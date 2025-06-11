@@ -89,7 +89,7 @@ export function CreateSpaceDialog() {
           setOpen(newOpen);
         }}
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Create New Space</DialogTitle>
             <DialogDescription>
@@ -97,53 +97,44 @@ export function CreateSpaceDialog() {
             </DialogDescription>
           </DialogHeader>
           
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Space Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Marketing Team" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Space Name</label>
+              <Input 
+                placeholder="e.g., Marketing Team" 
+                value={form.watch("name")}
+                onChange={(e) => form.setValue("name", e.target.value)}
               />
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Describe the purpose of this space..."
-                        rows={3}
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (Optional)</label>
+              <Textarea 
+                placeholder="Describe the purpose of this space..."
+                rows={3}
+                value={form.watch("description") ?? ""}
+                onChange={(e) => form.setValue("description", e.target.value)}
               />
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createSpaceMutation.isPending}>
-                  {createSpaceMutation.isPending ? "Creating..." : "Create Space"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  const data = {
+                    name: form.getValues("name"),
+                    description: form.getValues("description")
+                  };
+                  onSubmit(data);
+                }}
+                disabled={createSpaceMutation.isPending}
+              >
+                {createSpaceMutation.isPending ? "Creating..." : "Create Space"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
