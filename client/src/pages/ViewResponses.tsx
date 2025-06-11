@@ -63,8 +63,8 @@ export default function ViewResponses() {
     );
   }
 
-  const { responses, stats } = responseData;
-  const questions = form.questions as Question[];
+  const { responses, stats } = responseData as any;
+  const questions = (form as any).questions as Question[];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -72,7 +72,7 @@ export default function ViewResponses() {
       <div className="mb-8">
         <Button
           variant="ghost"
-          onClick={() => setLocation(`/spaces/${form.spaceId}`)}
+          onClick={() => setLocation(`/spaces/${(form as any).spaceId}`)}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -85,7 +85,8 @@ export default function ViewResponses() {
         responses={responses}
         questions={questions}
         stats={stats}
-        formTitle={form.title}
+        formTitle={(form as any).title}
+        currentUserId={(user as any)?.id}
       />
     </div>
   );

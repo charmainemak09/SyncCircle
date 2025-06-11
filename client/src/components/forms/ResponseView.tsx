@@ -15,9 +15,10 @@ interface ResponseViewProps {
     averageRating?: number;
   };
   formTitle: string;
+  currentUserId?: string;
 }
 
-export function ResponseView({ responses, questions, stats, formTitle }: ResponseViewProps) {
+export function ResponseView({ responses, questions, stats, formTitle, currentUserId }: ResponseViewProps) {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -159,19 +160,26 @@ export function ResponseView({ responses, questions, stats, formTitle }: Respons
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <Avatar>
-                      <AvatarImage src={response.user.avatar || undefined} />
+                      <AvatarImage src={response.user.profileImageUrl || undefined} />
                       <AvatarFallback>
-                        {response.user.name.split(' ').map(n => n[0]).join('')}
+                        {response.user.firstName?.[0]}{response.user.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h4 className="font-medium text-gray-900">{response.user.name}</h4>
+                      <h4 className="font-medium text-gray-900">
+                        {response.user.firstName} {response.user.lastName}
+                      </h4>
                       <div className="flex items-center text-sm text-gray-500">
                         <Clock className="w-3 h-3 mr-1" />
-                        Submitted {formatTimeAgo(response.submittedAt)}
+                        Submitted {formatTimeAgo(response.submittedAt.toString())}
                       </div>
                     </div>
                   </div>
+                  {currentUserId === response.user.id && (
+                    <Button variant="outline" size="sm">
+                      Edit Response
+                    </Button>
+                  )}
                 </div>
 
                 <div className="space-y-4">
