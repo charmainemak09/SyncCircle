@@ -77,7 +77,13 @@ export function CreateSpaceDialog() {
         <span>Create Space</span>
       </Button>
       
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog 
+        open={open} 
+        onOpenChange={(newOpen) => {
+          console.log("Dialog onOpenChange called with:", newOpen);
+          setOpen(newOpen);
+        }}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Space</DialogTitle>
