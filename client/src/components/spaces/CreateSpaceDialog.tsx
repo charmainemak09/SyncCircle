@@ -44,6 +44,7 @@ export function CreateSpaceDialog() {
       form.reset();
     },
     onError: (error: any) => {
+      console.error("Create space error:", error);
       toast({
         title: "Failed to create space",
         description: error.message || "Please try again.",
@@ -53,6 +54,7 @@ export function CreateSpaceDialog() {
   });
 
   const onSubmit = (data: CreateSpaceData) => {
+    console.log("Submitting space data:", data);
     createSpaceMutation.mutate(data);
   };
 
@@ -99,6 +101,8 @@ export function CreateSpaceDialog() {
                       placeholder="Describe the purpose of this space..."
                       rows={3}
                       {...field}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
