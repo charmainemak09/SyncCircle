@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import LoginPage from "@/components/auth/LoginPage";
 import Dashboard from "@/pages/Dashboard";
 import SpaceDetail from "@/pages/SpaceDetail";
@@ -46,12 +46,12 @@ function AppNavigation() {
           </Button>
           <div className="flex items-center space-x-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.photoURL || undefined} />
+              <AvatarImage src={user?.profileImageUrl || undefined} />
               <AvatarFallback>
-                {user?.displayName?.split(' ').map(n => n[0]).join('') || 'U'}
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm text-gray-700">{user?.displayName}</span>
+            <span className="text-sm text-gray-700">{user?.firstName} {user?.lastName}</span>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
             </Button>
@@ -63,9 +63,9 @@ function AppNavigation() {
 }
 
 function Router() {
-  const { user, loading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -78,7 +78,7 @@ function Router() {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <LoginPage />;
   }
 
@@ -102,10 +102,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Router />
-        </AuthProvider>
+        <Toaster />
+        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );

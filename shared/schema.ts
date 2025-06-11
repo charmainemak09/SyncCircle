@@ -96,6 +96,7 @@ export const insertResponseSchema = createInsertSchema(responses).omit({
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 
 export type Space = typeof spaces.$inferSelect;
 export type InsertSpace = z.infer<typeof insertSpaceSchema>;

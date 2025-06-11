@@ -1,6 +1,6 @@
 import { 
   users, spaces, spaceMembers, forms, responses,
-  type User, type InsertUser,
+  type User, type InsertUser, type UpsertUser,
   type Space, type InsertSpace,
   type SpaceMember, type InsertSpaceMember,
   type Form, type InsertForm,
@@ -11,22 +11,21 @@ import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
-  getUser(id: number): Promise<User | undefined>;
-  getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Spaces
   getSpace(id: number): Promise<Space | undefined>;
   getSpaceByInviteCode(inviteCode: string): Promise<Space | undefined>;
-  getUserSpaces(userId: number): Promise<(Space & { memberCount: number; role: string })[]>;
+  getUserSpaces(userId: string): Promise<(Space & { memberCount: number; role: string })[]>;
   createSpace(space: InsertSpace & { inviteCode: string }): Promise<Space>;
   updateSpace(id: number, updates: Partial<InsertSpace>): Promise<Space | undefined>;
 
   // Space Members
   getSpaceMembers(spaceId: number): Promise<(SpaceMember & { user: User })[]>;
-  isSpaceMember(spaceId: number, userId: number): Promise<boolean>;
+  isSpaceMember(spaceId: number, userId: string): Promise<boolean>;
   addSpaceMember(member: InsertSpaceMember): Promise<SpaceMember>;
-  getSpaceMemberRole(spaceId: number, userId: number): Promise<string | undefined>;
+  getSpaceMemberRole(spaceId: number, userId: string): Promise<string | undefined>;
 
   // Forms
   getForm(id: number): Promise<Form | undefined>;
