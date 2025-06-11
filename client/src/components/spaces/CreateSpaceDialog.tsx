@@ -54,14 +54,19 @@ export function CreateSpaceDialog() {
   });
 
   const onSubmit = (data: CreateSpaceData) => {
-    console.log("Submitting space data:", data);
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
     createSpaceMutation.mutate(data);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center space-x-2">
+        <Button 
+          className="flex items-center space-x-2"
+          onClick={() => console.log("Create Space button clicked")}
+        >
           <Plus className="w-4 h-4" />
           <span>Create Space</span>
         </Button>
