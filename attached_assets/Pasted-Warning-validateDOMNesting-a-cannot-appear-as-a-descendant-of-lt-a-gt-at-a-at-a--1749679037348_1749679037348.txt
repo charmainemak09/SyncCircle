@@ -1,0 +1,29 @@
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at a
+    at https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bd85c902:337:18
+    at div
+    at nav
+    at AppNavigation (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/src/App.tsx?v=6567i34Lvxr-_-027fm67:36:20)
+    at div
+    at Router (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/src/App.tsx?v=6567i34Lvxr-_-027fm67:135:48)
+    at Provider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5AJU3CG7.js?v=bd85c902:38:15)
+    at TooltipProvider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=bd85c902:61:5)
+    at QueryClientProvider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=bd85c902:2805:3)
+    at App
+at a
+at a
+at https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bd85c902:337:18
+at div
+at nav
+at AppNavigation (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/src/App.tsx?v=6567i34Lvxr-_-027fm67:36:20)
+at div
+at Router (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/src/App.tsx?v=6567i34Lvxr-_-027fm67:135:48)
+at Provider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5AJU3CG7.js?v=bd85c902:38:15)
+at TooltipProvider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=bd85c902:61:5)
+at QueryClientProvider (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=bd85c902:2805:3)
+at App
+at t.value (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://3712fef7-7ed8-4687-97d1-411cf3aa5a99-00-3kfh54oev6ns5.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
