@@ -20,12 +20,8 @@ import { Link } from "wouter";
 function AppNavigation() {
   const { user } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+  const handleLogout = () => {
+    window.location.href = '/api/logout';
   };
 
   return (
@@ -46,12 +42,12 @@ function AppNavigation() {
           </Button>
           <div className="flex items-center space-x-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.profileImageUrl || undefined} />
+              <AvatarImage src={(user as any)?.profileImageUrl || undefined} />
               <AvatarFallback>
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm text-gray-700">{user?.firstName} {user?.lastName}</span>
+            <span className="text-sm text-gray-700">{(user as any)?.firstName} {(user as any)?.lastName}</span>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
             </Button>
