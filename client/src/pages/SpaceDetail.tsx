@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -5,13 +6,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy } from "lucide-react";
 import { type Form } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SpaceDetail() {
   const { id } = useParams();
   const spaceId = parseInt(id!);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const { toast } = useToast();
   
   const permissions = usePermissions(spaceId);
 
@@ -53,7 +58,15 @@ export default function SpaceDetail() {
     );
   }
 
-  const { space, members, forms, userRole } = data;
+  const { space, members, forms, userRole } = data as any;
+
+  const copyInviteCode = () => {
+    navigator.clipboard.writeText(space.inviteCode);
+    toast({
+      title: "Invite code copied!",
+      description: "Share this code with team members to invite them.",
+    });
+  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -88,16 +101,49 @@ export default function SpaceDetail() {
           </div>
         </div>
         <div className="flex items-center space-x-3">
+          {userRole === 'admin' && (
+            <>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Invite Member
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Invite Team Members</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Share this invite code with team members to add them to {space.name}:
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-lg font-mono text-center">
+                        {space.inviteCode}
+                      </code>
+                      <Button size="sm" variant="outline" onClick={copyInviteCode}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Team members can use this code in the "Join Space" option on their dashboard.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Link href={`/spaces/${spaceId}/forms/new`}>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Check-in
+                </Button>
+              </Link>
+            </>
+          )}
           <Button variant="outline">
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>
-          <Link href={`/spaces/${spaceId}/forms/new`}>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New Check-in
-            </Button>
-          </Link>
         </div>
       </div>
 

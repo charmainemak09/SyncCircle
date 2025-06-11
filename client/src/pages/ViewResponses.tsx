@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { type Question } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ViewResponses() {
   const { formId } = useParams();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const { data: form, isLoading: formLoading } = useQuery({
     queryKey: [`/api/forms/${formId}`],
