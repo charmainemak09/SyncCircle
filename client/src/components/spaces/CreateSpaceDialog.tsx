@@ -65,7 +65,11 @@ export function CreateSpaceDialog() {
       <DialogTrigger asChild>
         <Button 
           className="flex items-center space-x-2"
-          onClick={() => console.log("Create Space button clicked")}
+          onClick={() => {
+            console.log("Create Space button clicked");
+            console.log("Dialog open state:", open);
+            setOpen(true);
+          }}
         >
           <Plus className="w-4 h-4" />
           <span>Create Space</span>
