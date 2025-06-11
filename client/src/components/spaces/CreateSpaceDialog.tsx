@@ -24,6 +24,8 @@ export function CreateSpaceDialog() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  console.log("Dialog render - open state:", open);
+
   const form = useForm<CreateSpaceData>({
     resolver: zodResolver(createSpaceSchema),
     defaultValues: {
@@ -66,7 +68,9 @@ export function CreateSpaceDialog() {
         className="flex items-center space-x-2"
         onClick={() => {
           console.log("Create Space button clicked - opening dialog");
+          console.log("Setting open to true");
           setOpen(true);
+          console.log("After setOpen - open should be true");
         }}
       >
         <Plus className="w-4 h-4" />
