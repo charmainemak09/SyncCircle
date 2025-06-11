@@ -100,9 +100,10 @@ export function CreateSpaceDialog() {
                     <Textarea 
                       placeholder="Describe the purpose of this space..."
                       rows={3}
-                      {...field}
                       value={field.value ?? ""}
                       onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
                     />
                   </FormControl>
                   <FormMessage />

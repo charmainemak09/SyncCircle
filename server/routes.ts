@@ -41,19 +41,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/spaces", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log("Creating space for user:", userId, "with data:", req.body);
+      
       const spaceData = insertSpaceSchema.parse({
         ...req.body,
         ownerId: userId,
       });
+
+      console.log("Parsed space data:", spaceData);
 
       const space = await storage.createSpace({
         ...spaceData,
         inviteCode: generateInviteCode(),
       });
 
+      console.log("Created space:", space);
       res.json(space);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation error:", error.errors);
         res.status(400).json({ error: error.errors });
       } else {
         console.error("Create space error:", error);
