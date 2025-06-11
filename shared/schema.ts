@@ -1,14 +1,29 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table.
+// This table is mandatory for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: json("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)]
+);
+
+// User storage table.
+// This table is mandatory for Replit Auth
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  firebaseUid: text("firebase_uid").notNull().unique(),
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  avatar: text("avatar"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  id: text("id").primaryKey().notNull(),
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const spaces = pgTable("spaces", {
@@ -17,14 +32,14 @@ export const spaces = pgTable("spaces", {
   description: text("description"),
   image: text("image"),
   inviteCode: text("invite_code").notNull().unique(),
-  ownerId: integer("owner_id").references(() => users.id).notNull(),
+  ownerId: text("owner_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const spaceMembers = pgTable("space_members", {
   id: serial("id").primaryKey(),
   spaceId: integer("space_id").references(() => spaces.id).notNull(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   role: text("role").notNull().default("member"), // "admin" | "member"
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 });
@@ -34,7 +49,7 @@ export const forms = pgTable("forms", {
   title: text("title").notNull(),
   description: text("description"),
   spaceId: integer("space_id").references(() => spaces.id).notNull(),
-  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdBy: text("created_by").references(() => users.id).notNull(),
   questions: json("questions").notNull(), // Array of question objects
   frequency: text("frequency").notNull(), // "weekly" | "biweekly" | "monthly"
   sendTime: text("send_time").notNull(), // "HH:MM" format
@@ -45,7 +60,7 @@ export const forms = pgTable("forms", {
 export const responses = pgTable("responses", {
   id: serial("id").primaryKey(),
   formId: integer("form_id").references(() => forms.id).notNull(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   answers: json("answers").notNull(), // Object with question IDs as keys
   isDraft: boolean("is_draft").default(false).notNull(),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
@@ -53,8 +68,8 @@ export const responses = pgTable("responses", {
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertSpaceSchema = createInsertSchema(spaces).omit({
