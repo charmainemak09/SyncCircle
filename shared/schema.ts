@@ -40,7 +40,7 @@ export const spaceMembers = pgTable("space_members", {
   id: serial("id").primaryKey(),
   spaceId: integer("space_id").references(() => spaces.id).notNull(),
   userId: text("user_id").references(() => users.id).notNull(),
-  role: text("role").notNull().default("member"), // "admin" | "member"
+  role: text("role").notNull().default("participant"), // "admin" | "participant"
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 });
 

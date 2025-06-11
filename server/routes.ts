@@ -80,11 +80,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const members = await storage.getSpaceMembers(spaceId);
       const forms = await storage.getSpaceForms(spaceId);
+      const userRole = await storage.getSpaceMemberRole(spaceId, userId);
 
-      res.json({ space, members, forms });
+      res.json({ space, members, forms, userRole });
     } catch (error) {
       console.error("Get space error:", error);
       res.status(500).json({ message: "Failed to get space" });
+    }
+  });
+
+  app.get("/api/spaces/:id/role", isAuthenticated, async (req: any, res) => {
+    try {
+      const spaceId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const role = await storage.getSpaceMemberRole(spaceId, userId);
+      if (!role) {
+        return res.status(404).json({ message: "Not a member of this space" });
+      }
+
+      res.json(role);
+    } catch (error) {
+      console.error("Get user role error:", error);
+      res.status(500).json({ message: "Failed to get user role" });
     }
   });
 
@@ -107,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.addSpaceMember({
         spaceId: space.id,
         userId: userId,
-        role: "member",
+        role: "participant",
       });
 
       res.json({ message: "Successfully joined space", space });

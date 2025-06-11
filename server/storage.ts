@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
   async createSpace(space: InsertSpace & { inviteCode: string }): Promise<Space> {
     const [newSpace] = await db.insert(spaces).values(space).returning();
     
-    // Add the owner as an admin member
+    // Add the owner as an admin
     await db.insert(spaceMembers).values({
       spaceId: newSpace.id,
       userId: space.ownerId,

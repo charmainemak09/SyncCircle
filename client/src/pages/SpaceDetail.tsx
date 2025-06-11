@@ -5,12 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock } from "lucide-react";
+import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus } from "lucide-react";
 import { type Form } from "@shared/schema";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function SpaceDetail() {
   const { id } = useParams();
   const spaceId = parseInt(id!);
+  
+  const permissions = usePermissions(spaceId);
 
   const { data, isLoading } = useQuery({
     queryKey: [`/api/spaces/${spaceId}`],
@@ -50,7 +53,7 @@ export default function SpaceDetail() {
     );
   }
 
-  const { space, members, forms } = data;
+  const { space, members, forms, userRole } = data;
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
