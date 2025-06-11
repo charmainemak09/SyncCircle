@@ -75,7 +75,79 @@ function Router() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pt-20 pb-16 text-center lg:pt-32">
+            <div className="mx-auto max-w-4xl">
+              <div className="mb-8 flex justify-center">
+                <div className="bg-primary text-white w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl">
+                  SC
+                </div>
+              </div>
+              <h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-900 sm:text-7xl">
+                Team sync made{' '}
+                <span className="relative whitespace-nowrap text-blue-600">
+                  <span className="relative">simple</span>
+                </span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700">
+                Create custom forms, collect team updates, and keep everyone aligned with recurring check-ins and automated newsletters.
+              </p>
+              <div className="mt-10 flex justify-center gap-x-6">
+                <Button 
+                  onClick={() => window.location.href = '/api/login'}
+                  size="lg"
+                  className="px-8 py-3 text-lg"
+                >
+                  Get Started
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="text-center">
+                  <div className="mx-auto h-12 w-12 text-blue-600">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900">Custom Forms</h3>
+                  <p className="mt-2 text-slate-600">
+                    Build forms with multiple question types including text, ratings, and multiple choice.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="mx-auto h-12 w-12 text-blue-600">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900">Recurring Check-ins</h3>
+                  <p className="mt-2 text-slate-600">
+                    Schedule automatic reminders and collect regular updates from your team.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="mx-auto h-12 w-12 text-blue-600">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900">Team Management</h3>
+                  <p className="mt-2 text-slate-600">
+                    Invite team members with simple codes and manage permissions effortlessly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
