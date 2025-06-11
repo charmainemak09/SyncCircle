@@ -58,7 +58,7 @@ export default function SpaceDetail() {
     );
   }
 
-  const { space, members, forms, userRole } = data as any;
+  const { space, members = [], forms = [], userRole } = data as any;
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(space.inviteCode);
@@ -248,13 +248,15 @@ export default function SpaceDetail() {
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <Avatar>
-                      <AvatarImage src={member.user.avatar || undefined} />
+                      <AvatarImage src={member.user.profileImageUrl || undefined} />
                       <AvatarFallback>
-                        {member.user.name.split(' ').map((n: string) => n[0]).join('')}
+                        {member.user.firstName?.[0]}{member.user.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium text-gray-900">{member.user.name}</p>
+                      <p className="font-medium text-gray-900">
+                        {member.user.firstName} {member.user.lastName}
+                      </p>
                       <p className="text-sm text-gray-600">{member.user.email}</p>
                       <Badge variant={member.role === "admin" ? "default" : "secondary"} className="mt-1">
                         {member.role}

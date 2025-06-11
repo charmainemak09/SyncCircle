@@ -123,11 +123,11 @@ export function CreateSpaceDialog() {
               </Button>
               <Button 
                 onClick={() => {
-                  const data = {
-                    name: form.getValues("name"),
-                    description: form.getValues("description")
-                  };
-                  onSubmit(data);
+                  const name = form.getValues("name");
+                  const description = form.getValues("description");
+                  if (name.trim()) {
+                    onSubmit({ name: name.trim(), description: description || "" });
+                  }
                 }}
                 disabled={createSpaceMutation.isPending}
               >
