@@ -81,6 +81,11 @@ export function CreateSpaceDialog() {
         open={open} 
         onOpenChange={(newOpen) => {
           console.log("Dialog onOpenChange called with:", newOpen);
+          // Only allow closing via explicit cancel/submit actions
+          if (!newOpen) {
+            console.log("Preventing automatic dialog close");
+            return;
+          }
           setOpen(newOpen);
         }}
       >
