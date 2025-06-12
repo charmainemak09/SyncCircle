@@ -2,12 +2,18 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { FormBuilder } from "@/components/forms/FormBuilder";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Question } from "@shared/schema";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Star } from "lucide-react";
 
 export default function FormBuilderPage() {
   const { spaceId, formId } = useParams();
@@ -121,20 +127,93 @@ export default function FormBuilderPage() {
     });
   };
 
-  const handlePreview = () => {
-    if (questions.length === 0) {
-      toast({
-        title: "No questions to preview",
-        description: "Add some questions to preview the form.",
-        variant: "destructive",
-      });
-      return;
+  const [previewAnswers, setPreviewAnswers] = useState<Record<string, any>>({});
+
+  const renderPreviewQuestion = (question: Question, index: number) => {
+    const value = previewAnswers[question.id] || "";
+
+    switch (question.type) {
+      case "text":
+        return (
+          <Input
+            placeholder="Type your answer here..."
+            value={value}
+            onChange={(e) => setPreviewAnswers(prev => ({ 
+              ...prev, 
+              [question.id]: e.target.value 
+            }))}
+          />
+        );
+      
+      case "textarea":
+        return (
+          <Textarea
+            placeholder="Type your answer here..."
+            value={value}
+            onChange={(e) => setPreviewAnswers(prev => ({ 
+              ...prev, 
+              [question.id]: e.target.value 
+            }))}
+            rows={4}
+          />
+        );
+      
+      case "multiple-choice":
+        return (
+          <RadioGroup
+            value={value}
+            onValueChange={(val) => setPreviewAnswers(prev => ({ 
+              ...prev, 
+              [question.id]: val 
+            }))}
+          >
+            {question.options?.map((option, optionIndex) => (
+              <div key={optionIndex} className="flex items-center space-x-2">
+                <RadioGroupItem value={option} id={`${question.id}-${optionIndex}`} />
+                <Label htmlFor={`${question.id}-${optionIndex}`}>{option}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+        );
+      
+      case "rating":
+        const maxRating = question.maxRating || 5;
+        return (
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: maxRating }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setPreviewAnswers(prev => ({ 
+                  ...prev, 
+                  [question.id]: i + 1 
+                }))}
+                className={`w-8 h-8 ${
+                  (value >= i + 1) ? "text-yellow-400" : "text-gray-300"
+                } hover:text-yellow-400 transition-colors`}
+              >
+                <Star className="w-full h-full fill-current" />
+              </button>
+            ))}
+            {value > 0 && (
+              <span className="ml-2 text-sm text-gray-600">
+                {value} out of {maxRating}
+              </span>
+            )}
+          </div>
+        );
+      
+      case "image":
+        return (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <p className="text-gray-500">Image upload placeholder</p>
+            <p className="text-sm text-gray-400">Click to select an image</p>
+          </div>
+        );
+      
+      default:
+        return <p className="text-gray-500">Unknown question type</p>;
     }
-    // Could implement a preview modal here
-    toast({
-      title: "Preview coming soon",
-      description: "Form preview functionality will be available soon.",
-    });
   };
 
   if (isLoading) {
@@ -171,10 +250,75 @@ export default function FormBuilderPage() {
         </div>
         
         <div className="flex items-center space-x-3">
-          <Button variant="outline" onClick={handlePreview}>
-            <Eye className="w-4 h-4 mr-2" />
-            Preview
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                disabled={questions.length === 0}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Form Preview</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                {/* Form Title */}
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                    {title || "Untitled Form"}
+                  </h2>
+                  {description && (
+                    <p className="text-gray-600 text-sm">{description}</p>
+                  )}
+                </div>
+
+                {/* Questions */}
+                {questions.map((question, index) => (
+                  <Card key={question.id}>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <Label className="text-sm font-medium text-gray-900">
+                            {index + 1}. {question.title || "Untitled Question"}
+                            {question.required && (
+                              <span className="text-red-500 ml-1">*</span>
+                            )}
+                          </Label>
+                          <Badge variant="secondary" className="text-xs">
+                            {question.type.replace('-', ' ')}
+                          </Badge>
+                        </div>
+                        {renderPreviewQuestion(question, index)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {questions.length === 0 && (
+                  <Card className="border-2 border-dashed border-gray-300">
+                    <CardContent className="p-8 text-center">
+                      <p className="text-gray-500">No questions to preview</p>
+                      <p className="text-sm text-gray-400">
+                        Add questions to see how your form will look
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Preview Submit Button */}
+                {questions.length > 0 && (
+                  <div className="flex justify-end pt-4 border-t">
+                    <Button className="bg-primary hover:bg-primary/90">
+                      Submit Response (Preview)
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
             onClick={handleSave}
             disabled={saveFormMutation.isPending}
