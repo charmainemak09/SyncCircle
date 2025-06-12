@@ -34,8 +34,10 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      console.log("Upload mutation called with file:", file.name, file.size, file.type);
       const formData = new FormData();
       formData.append("image", file);
+      console.log("FormData created:", formData.get("image"));
       
       setIsUploading(true);
       setUploadProgress(0);
@@ -110,7 +112,9 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("File selected:", file);
     if (file && validateAndProcessFile(file)) {
+      console.log("File validated, starting upload:", file.name, file.size);
       uploadMutation.mutate(file);
     }
   };
@@ -174,7 +178,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
           </div>
         </div>
         
-        <Input
+        <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
