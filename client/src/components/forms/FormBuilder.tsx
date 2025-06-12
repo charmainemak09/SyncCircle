@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit, Type, AlignLeft, List, Star, Image } from "lucide-react";
+import { Plus, Trash2, Edit, Type, AlignLeft, List, Star, Image, ChevronDown } from "lucide-react";
 import { type Question, type QuestionType } from "@shared/schema";
 
 interface FormBuilderProps {
@@ -95,27 +95,32 @@ export function FormBuilder({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Form Elements Sidebar */}
-      <div className="lg:col-span-1">
-        <h3 className="font-semibold text-gray-900 mb-4">Form Elements</h3>
-        <div className="space-y-2">
-          {questionTypes.map(({ value, label, icon: Icon }) => (
-            <Button
-              key={value}
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => addQuestion(value)}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              {label}
-            </Button>
-          ))}
-        </div>
+    <div className="space-y-6">
+      {/* Add Question Dropdown */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">Form Builder</h2>
+        <Select onValueChange={(value: QuestionType) => addQuestion(value)}>
+          <SelectTrigger className="w-48">
+            <div className="flex items-center">
+              <Plus className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Add Question" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {questionTypes.map(({ value, label, icon: Icon }) => (
+              <SelectItem key={value} value={value}>
+                <div className="flex items-center">
+                  <Icon className="w-4 h-4 mr-2" />
+                  {label}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Form Builder Canvas */}
-      <div className="lg:col-span-3">
+      <div>
         <div className="space-y-6">
           {/* Form Title */}
           <Card>
@@ -252,7 +257,7 @@ export function FormBuilder({
               <CardContent className="p-8 text-center">
                 <p className="text-gray-500 mb-4">No questions added yet</p>
                 <p className="text-sm text-gray-400">
-                  Use the form elements on the left to add questions to your form
+                  Use the dropdown above to add questions to your form
                 </p>
               </CardContent>
             </Card>
