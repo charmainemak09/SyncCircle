@@ -28,17 +28,24 @@ export default function FormBuilderPage() {
   const isEditing = !!formId;
 
   // Load existing form data if editing
-  const { data: existingForm, isLoading } = useQuery({
+  const { data: existingForm, isLoading } = useQuery<{
+    title: string;
+    description: string | null;
+    questions: Question[];
+    frequency: string;
+    sendTime: string;
+    startDate: string;
+  }>({
     queryKey: [`/api/forms/${formId}`],
     enabled: isEditing,
   });
 
   // Set form data when loading existing form
   useEffect(() => {
-    if (existingForm) {
+    if (existingForm && 'title' in existingForm) {
       setTitle(existingForm.title);
       setDescription(existingForm.description || "");
-      setQuestions(existingForm.questions as Question[]);
+      setQuestions(existingForm.questions);
       setFrequency(existingForm.frequency);
       setSendTime(existingForm.sendTime);
       setStartDate(existingForm.startDate || new Date().toISOString().split('T')[0]);

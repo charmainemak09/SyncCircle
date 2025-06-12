@@ -37,42 +37,42 @@ export function SpaceCard({ space }: SpaceCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <CardContent className="p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className={`w-12 h-12 ${iconConfig.bg} rounded-lg flex items-center justify-center text-white font-semibold`}>
-            <Icon className="w-6 h-6" />
+    <Link href={`/spaces/${space.id}`}>
+      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className={`w-12 h-12 ${iconConfig.bg} rounded-lg flex items-center justify-center text-white font-semibold`}>
+              <Icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{space.name}</h3>
+              <p className="text-sm text-gray-500">{space.memberCount} members</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">{space.name}</h3>
-            <p className="text-sm text-gray-500">{space.memberCount} members</p>
+          
+          {space.description && (
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{space.description}</p>
+          )}
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Badge variant={space.role === "admin" ? "default" : "secondary"}>
+                {space.role}
+              </Badge>
+            </div>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="w-3 h-3 mr-1" />
+              {formatTimeAgo(space.createdAt)}
+            </div>
           </div>
-        </div>
+        </CardContent>
         
-        {space.description && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{space.description}</p>
-        )}
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Badge variant={space.role === "admin" ? "default" : "secondary"}>
-              {space.role}
-            </Badge>
-          </div>
-          <div className="flex items-center text-xs text-gray-500">
-            <Clock className="w-3 h-3 mr-1" />
-            {formatTimeAgo(space.createdAt)}
-          </div>
-        </div>
-      </CardContent>
-      
-      <div className="bg-gray-50 px-6 py-3 border-t border-gray-100">
-        <Link href={`/spaces/${space.id}`}>
-          <a className="text-primary text-sm font-medium hover:text-indigo-700">
+        <div className="bg-gray-50 px-6 py-3 border-t border-gray-100">
+          <span className="text-primary text-sm font-medium hover:text-indigo-700">
             View Space →
-          </a>
-        </Link>
-      </div>
-    </Card>
+          </span>
+        </div>
+      </Card>
+    </Link>
   );
 }
