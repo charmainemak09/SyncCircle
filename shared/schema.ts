@@ -51,8 +51,9 @@ export const forms = pgTable("forms", {
   spaceId: integer("space_id").references(() => spaces.id).notNull(),
   createdBy: text("created_by").references(() => users.id).notNull(),
   questions: json("questions").notNull(), // Array of question objects
-  frequency: text("frequency").notNull(), // "weekly" | "biweekly" | "monthly"
+  frequency: text("frequency").notNull(), // "daily" | "weekly" | "biweekly" | "monthly"
   sendTime: text("send_time").notNull(), // "HH:MM" format
+  startDate: text("start_date").notNull(), // "YYYY-MM-DD" format
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
