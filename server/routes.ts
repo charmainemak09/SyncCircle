@@ -110,12 +110,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload form images/documents
   app.post('/api/upload/form-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
     try {
+      console.log("Upload form image request received");
+      console.log("Request body:", req.body);
+      console.log("Request file:", req.file);
+      console.log("Request files:", req.files);
+      
       if (!req.file) {
+        console.log("No file found in request");
         return res.status(400).json({ message: "No file uploaded" });
       }
 
       // Generate the URL for the uploaded file
       const imageUrl = `/uploads/${req.file.filename}`;
+      
+      console.log("File uploaded successfully:", {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
       
       res.json({ 
         success: true, 
