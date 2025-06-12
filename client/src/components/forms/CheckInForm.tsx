@@ -215,7 +215,7 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
 
   // Load existing answers
   useEffect(() => {
-    if (existingResponse && typeof existingResponse === 'object' && 'answers' in existingResponse) {
+    if (existingResponse && typeof existingResponse === 'object' && 'answers' in existingResponse && existingResponse.answers) {
       setAnswers(existingResponse.answers as Record<string, any>);
     }
   }, [existingResponse]);
