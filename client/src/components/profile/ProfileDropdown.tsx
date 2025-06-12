@@ -314,25 +314,37 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
                   </div>
                 </div>
                 
-                {selectedFile && (
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      size="sm" 
-                      onClick={handleImageUpload}
-                      disabled={isUploading}
-                    >
-                      {isUploading ? "Uploading..." : "Upload Image"}
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={clearSelectedFile}
-                      disabled={isUploading}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
+                <div className="flex items-center space-x-2 mt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Browse Files
+                  </Button>
+                  
+                  {selectedFile && (
+                    <>
+                      <Button 
+                        size="sm" 
+                        onClick={handleImageUpload}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? "Uploading..." : "Upload Image"}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={clearSelectedFile}
+                        disabled={isUploading}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
                 
                 {isUploading && (
                   <div className="space-y-2">
