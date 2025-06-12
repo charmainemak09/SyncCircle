@@ -107,6 +107,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload form images/documents
+  app.post('/api/upload/form-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Generate the URL for the uploaded file
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({ 
+        success: true, 
+        imageUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+
+    } catch (error) {
+      console.error("Upload form image error:", error);
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "File too large. Maximum size is 10MB." });
+        }
+      }
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
   // Serve uploaded files
   app.use('/uploads', (req, res, next) => {
     const filePath = path.join(uploadsDir, req.path);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,7 +6,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Save, Send, Star } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Save, Send, Star, Upload, X, FileImage } from "lucide-react";
 import { type Form, type Question, type Answer } from "@shared/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -15,6 +16,190 @@ import { useToast } from "@/hooks/use-toast";
 interface CheckInFormProps {
   form: Form;
   onSubmit?: () => void;
+}
+
+interface ImageUploadFieldProps {
+  questionId: string;
+  currentValue?: string;
+  onUpload: (url: string) => void;
+}
+
+function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFieldProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("image", file);
+      
+      setIsUploading(true);
+      setUploadProgress(0);
+      
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 100);
+      
+      try {
+        const response = await apiRequest("POST", "/api/upload/form-image", formData);
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        return response;
+      } catch (error) {
+        clearInterval(progressInterval);
+        throw error;
+      } finally {
+        setTimeout(() => {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }, 500);
+      }
+    },
+    onSuccess: (response: any) => {
+      onUpload(response.imageUrl);
+      setSelectedFile(null);
+      toast({
+        title: "Image uploaded",
+        description: "Your image has been uploaded successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const validateAndProcessFile = (file: File) => {
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a JPEG or PNG image.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 10MB.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setSelectedFile(file);
+    return true;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && validateAndProcessFile(file)) {
+      uploadMutation.mutate(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file && validateAndProcessFile(file)) {
+      uploadMutation.mutate(file);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`
+          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+          ${isDragOver 
+            ? 'border-primary bg-primary/5' 
+            : 'border-gray-300 hover:border-gray-400'
+          }
+          ${isUploading ? 'pointer-events-none opacity-50' : ''}
+        `}
+      >
+        <div className="flex flex-col items-center space-y-2">
+          {currentValue ? (
+            <img 
+              src={currentValue} 
+              alt="Uploaded" 
+              className="max-w-full max-h-48 rounded-lg"
+            />
+          ) : (
+            <FileImage className="w-12 h-12 text-gray-400" />
+          )}
+          
+          <div>
+            <p className="text-gray-600 mb-1">
+              {isDragOver 
+                ? 'Drop image here'
+                : currentValue
+                  ? 'Click to replace image'
+                  : 'Drop files here or click to upload'
+              }
+            </p>
+            <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
+          </div>
+        </div>
+        
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
+
+      {isUploading && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span>Uploading...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <Progress value={uploadProgress} className="w-full" />
+        </div>
+      )}
+
+      {selectedFile && !isUploading && (
+        <div className="text-xs text-gray-600">
+          Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
@@ -30,8 +215,8 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
 
   // Load existing answers
   useEffect(() => {
-    if (existingResponse?.answers) {
-      setAnswers(existingResponse.answers);
+    if (existingResponse && typeof existingResponse === 'object' && 'answers' in existingResponse) {
+      setAnswers(existingResponse.answers as Record<string, any>);
     }
   }, [existingResponse]);
 
@@ -193,22 +378,11 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
               )}
 
               {question.type === "image" && (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <div className="text-3xl text-gray-400 mb-4">📎</div>
-                  <p className="text-gray-600 mb-2">Drop files here or click to upload</p>
-                  <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        updateAnswer(question.id, file.name);
-                      }
-                    }}
-                  />
-                </div>
+                <ImageUploadField
+                  questionId={question.id}
+                  currentValue={answers[question.id]}
+                  onUpload={(url) => updateAnswer(question.id, url)}
+                />
               )}
             </CardContent>
           </Card>
