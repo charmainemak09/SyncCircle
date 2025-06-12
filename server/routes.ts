@@ -26,6 +26,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile routes
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { firstName, lastName } = req.body;
+
+      if (!firstName || !lastName) {
+        return res.status(400).json({ message: "First name and last name are required" });
+      }
+
+      const updatedUser = await storage.updateUser(userId, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.post('/api/user/upload-avatar', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // For now, we'll simulate the upload and return a placeholder URL
+      // In a real implementation, you would:
+      // 1. Use multer middleware to handle file uploads
+      // 2. Validate file type and size
+      // 3. Upload to a file storage service (AWS S3, Cloudinary, etc.)
+      // 4. Return the actual image URL
+      
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userId)}&backgroundColor=3b82f6`;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        profileImageUrl: avatarUrl,
+      });
+
+      res.json({ profileImageUrl: avatarUrl, user: updatedUser });
+    } catch (error) {
+      console.error("Upload avatar error:", error);
+      res.status(500).json({ message: "Failed to upload avatar" });
+    }
+  });
+
   // Space routes
   app.get("/api/spaces", isAuthenticated, async (req: any, res) => {
     try {

@@ -13,6 +13,7 @@ export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined>;
 
   // Spaces
   getSpace(id: number): Promise<Space | undefined>;

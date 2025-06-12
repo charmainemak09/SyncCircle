@@ -11,10 +11,9 @@ import FormBuilder from "@/pages/FormBuilder";
 import FillForm from "@/pages/FillForm";
 import ViewResponses from "@/pages/ViewResponses";
 import NotFound from "@/pages/not-found";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Bell, LogOut } from "lucide-react";
-import { logout } from "@/lib/auth";
+import { Bell } from "lucide-react";
+import { ProfileDropdown } from "@/components/profile/ProfileDropdown";
 import { Link } from "wouter";
 
 function AppNavigation() {
@@ -38,18 +37,10 @@ function AppNavigation() {
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
-          <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={(user as any)?.profileImageUrl || undefined} />
-              <AvatarFallback>
-                {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-gray-700">{(user as any)?.firstName} {(user as any)?.lastName}</span>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          <ProfileDropdown 
+            user={user as any}
+            onLogout={handleLogout}
+          />
         </div>
       </div>
     </nav>
