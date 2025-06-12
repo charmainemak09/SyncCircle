@@ -17,6 +17,8 @@ interface FormBuilderProps {
   onFrequencyChange: (frequency: string) => void;
   sendTime: string;
   onSendTimeChange: (sendTime: string) => void;
+  startDate: string;
+  onStartDateChange: (startDate: string) => void;
 }
 
 const questionTypes = [
@@ -36,6 +38,8 @@ export function FormBuilder({
   onFrequencyChange,
   sendTime,
   onSendTimeChange,
+  startDate,
+  onStartDateChange,
 }: FormBuilderProps) {
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
 
@@ -262,7 +266,7 @@ export function FormBuilder({
               <CardTitle>Form Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Frequency
@@ -272,6 +276,7 @@ export function FormBuilder({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="biweekly">Biweekly</SelectItem>
                       <SelectItem value="monthly">Monthly</SelectItem>
@@ -286,6 +291,16 @@ export function FormBuilder({
                     type="time"
                     value={sendTime}
                     onChange={(e) => onSendTimeChange(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start From Date
+                  </label>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => onStartDateChange(e.target.value)}
                   />
                 </div>
               </div>

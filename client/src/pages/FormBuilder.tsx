@@ -20,6 +20,10 @@ export default function FormBuilderPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [frequency, setFrequency] = useState("weekly");
   const [sendTime, setSendTime] = useState("09:00");
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
 
   const isEditing = !!formId;
 
@@ -37,6 +41,7 @@ export default function FormBuilderPage() {
       setQuestions(existingForm.questions as Question[]);
       setFrequency(existingForm.frequency);
       setSendTime(existingForm.sendTime);
+      setStartDate(existingForm.startDate || new Date().toISOString().split('T')[0]);
     }
   }, [existingForm]);
 
@@ -104,6 +109,7 @@ export default function FormBuilderPage() {
       questions,
       frequency,
       sendTime,
+      startDate,
       isActive: true,
     });
   };
@@ -186,6 +192,8 @@ export default function FormBuilderPage() {
             onFrequencyChange={setFrequency}
             sendTime={sendTime}
             onSendTimeChange={setSendTime}
+            startDate={startDate}
+            onStartDateChange={setStartDate}
           />
         </CardContent>
       </Card>
