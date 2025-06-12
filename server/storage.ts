@@ -69,6 +69,18 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
   async getSpace(id: number): Promise<Space | undefined> {
     const [space] = await db.select().from(spaces).where(eq(spaces.id, id));
     return space || undefined;
