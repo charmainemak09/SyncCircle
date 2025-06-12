@@ -44,7 +44,9 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -120,10 +122,7 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
     },
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const validateAndProcessFile = (file: File) => {
     // Validate file type
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!validTypes.includes(file.type)) {
@@ -132,7 +131,7 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
         description: "Please select a JPEG or PNG image.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     // Validate file size (10MB)
@@ -143,7 +142,7 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
         description: "Please select an image smaller than 10MB.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     setSelectedFile(file);
@@ -154,6 +153,37 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
       setPreviewUrl(e.target?.result as string);
     };
     reader.readAsDataURL(file);
+    return true;
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    validateAndProcessFile(file);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      validateAndProcessFile(file);
+    }
   };
 
   const handleImageUpload = () => {
@@ -240,16 +270,33 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
                     <AvatarFallback className="text-lg">{initials}</AvatarFallback>
                   </Avatar>
                   
-                  <div className="flex-1 space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                  <div className="flex-1">
+                    <div
+                      ref={dropZoneRef}
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`
+                        border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors
+                        ${isDragOver 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-gray-300 hover:border-gray-400'
+                        }
+                        ${isUploading ? 'pointer-events-none opacity-50' : ''}
+                      `}
                     >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose Image
-                    </Button>
+                      <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        {isDragOver 
+                          ? 'Drop image here' 
+                          : 'Drop files here or click to upload'
+                        }
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        JPEG, PNG up to 10MB
+                      </p>
+                    </div>
                     
                     <Input
                       ref={fileInputRef}
@@ -260,8 +307,8 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
                     />
                     
                     {selectedFile && (
-                      <div className="text-xs text-gray-600">
-                        {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      <div className="mt-2 text-xs text-gray-600">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                       </div>
                     )}
                   </div>
@@ -296,10 +343,7 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
                     <Progress value={uploadProgress} className="w-full" />
                   </div>
                 )}
-                
-                <p className="text-xs text-gray-500">
-                  Supported formats: JPEG, PNG. Max size: 10MB.
-                </p>
+
               </div>
               
               {/* Name Fields */}
