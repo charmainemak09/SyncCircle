@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +30,7 @@ export default function FormBuilderPage() {
   });
 
   // Set form data when loading existing form
-  React.useEffect(() => {
+  useEffect(() => {
     if (existingForm) {
       setTitle(existingForm.title);
       setDescription(existingForm.description || "");
