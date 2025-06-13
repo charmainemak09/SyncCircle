@@ -112,7 +112,7 @@ export type Response = typeof responses.$inferSelect;
 export type InsertResponse = z.infer<typeof insertResponseSchema>;
 
 // Question types
-export type QuestionType = "text" | "textarea" | "multiple-choice" | "rating" | "image";
+export type QuestionType = "text" | "textarea" | "multiple-choice" | "rating" | "image" | "file";
 
 export interface Question {
   id: string;

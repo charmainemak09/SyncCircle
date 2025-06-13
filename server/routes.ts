@@ -26,18 +26,34 @@ const upload = multer({
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, `avatar-${uniqueSuffix}${path.extname(file.originalname)}`);
+      const prefix = file.fieldname === 'file' ? 'file' : 'avatar';
+      cb(null, `${prefix}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
   }),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only JPEG and PNG images are allowed'));
+    // For avatar uploads
+    if (file.fieldname === 'image') {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only JPEG and PNG images are allowed'));
+      }
+    }
+    // For file uploads
+    else if (file.fieldname === 'file') {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only JPEG, PNG images and PDF files are allowed'));
+      }
+    }
+    else {
+      cb(new Error('Invalid file field'));
     }
   }
 });
@@ -133,6 +149,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
+  // Upload form files (supports multiple file types)
+  app.post('/api/upload/form-file', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Generate the URL for the uploaded file
+      const fileUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({ 
+        success: true, 
+        fileUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+
+    } catch (error) {
+      console.error("Upload form file error:", error);
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "File too large. Maximum size is 10MB." });
+        }
+      }
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Save, Send, Star, Upload, X, FileImage } from "lucide-react";
+import { Save, Send, Star, Upload, X, FileImage, File, FileText, Eye, Download } from "lucide-react";
 import { type Form, type Question, type Answer } from "@shared/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,6 +19,12 @@ interface CheckInFormProps {
 }
 
 interface ImageUploadFieldProps {
+  questionId: string;
+  currentValue?: string;
+  onUpload: (url: string) => void;
+}
+
+interface FileUploadFieldProps {
   questionId: string;
   currentValue?: string;
   onUpload: (url: string) => void;
@@ -206,6 +212,290 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
   );
 }
 
+function FileUploadField({ questionId, currentValue, onUpload }: FileUploadFieldProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      setIsUploading(true);
+      setUploadProgress(0);
+      
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 100);
+      
+      try {
+        const response = await apiRequest("POST", "/api/upload/form-file", formData);
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        return response;
+      } catch (error) {
+        clearInterval(progressInterval);
+        throw error;
+      } finally {
+        setTimeout(() => {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }, 500);
+      }
+    },
+    onSuccess: (response: any) => {
+      onUpload(response.fileUrl);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      toast({
+        title: "File uploaded",
+        description: "Your file has been uploaded successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload file. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const validateAndProcessFile = (file: File) => {
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a JPEG, PNG image or PDF file.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate file size (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Please select a file smaller than 10MB.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setSelectedFile(file);
+    
+    // Create preview URL for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    return true;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && validateAndProcessFile(file)) {
+      uploadMutation.mutate(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file && validateAndProcessFile(file)) {
+      uploadMutation.mutate(file);
+    }
+  };
+
+  const getFileIcon = (filename: string) => {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    if (extension === 'pdf') return <FileText className="w-8 h-8 text-red-500" />;
+    if (['jpg', 'jpeg', 'png'].includes(extension || '')) return <FileImage className="w-8 h-8 text-blue-500" />;
+    return <File className="w-8 h-8 text-gray-500" />;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  };
+
+  const handlePreview = () => {
+    if (currentValue) {
+      window.open(currentValue, '_blank');
+    }
+  };
+
+  const handleDownload = () => {
+    if (currentValue) {
+      const link = document.createElement('a');
+      link.href = currentValue;
+      link.download = currentValue.split('/').pop() || 'file';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {currentValue && !selectedFile ? (
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {getFileIcon(currentValue)}
+              <div>
+                <p className="font-medium text-sm">{currentValue.split('/').pop()}</p>
+                <p className="text-xs text-gray-500">Uploaded file</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handlePreview}
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                Preview
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDownload}
+              >
+                <Download className="w-4 h-4 mr-1" />
+                Download
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                Replace
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`
+            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+            ${isDragOver 
+              ? 'border-primary bg-primary/5' 
+              : 'border-gray-300 hover:border-gray-400'
+            }
+            ${isUploading ? 'pointer-events-none opacity-50' : ''}
+          `}
+        >
+          <div className="flex flex-col items-center space-y-2">
+            {previewUrl ? (
+              <img 
+                src={previewUrl} 
+                alt="Preview" 
+                className="max-w-full max-h-32 rounded-lg"
+              />
+            ) : (
+              <File className="w-12 h-12 text-gray-400" />
+            )}
+            
+            <div>
+              <p className="text-gray-600 mb-1">
+                {isDragOver 
+                  ? 'Drop file here'
+                  : selectedFile
+                    ? 'File ready to upload'
+                    : 'Drop files here or click to upload'
+                }
+              </p>
+              <p className="text-sm text-gray-500">JPEG, PNG, PDF up to 10MB</p>
+            </div>
+          </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+      )}
+
+      {isUploading && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span>Uploading...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <Progress value={uploadProgress} className="w-full" />
+        </div>
+      )}
+
+      {selectedFile && !isUploading && (
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-3">
+            {getFileIcon(selectedFile.name)}
+            <div>
+              <p className="text-sm font-medium">{selectedFile.name}</p>
+              <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedFile(null);
+              setPreviewUrl(null);
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+            }}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -383,6 +673,14 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
 
               {question.type === "image" && (
                 <ImageUploadField
+                  questionId={question.id}
+                  currentValue={answers[question.id]}
+                  onUpload={(url) => updateAnswer(question.id, url)}
+                />
+              )}
+
+              {question.type === "file" && (
+                <FileUploadField
                   questionId={question.id}
                   currentValue={answers[question.id]}
                   onUpload={(url) => updateAnswer(question.id, url)}
