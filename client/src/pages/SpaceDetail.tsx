@@ -21,8 +21,6 @@ export default function SpaceDetail() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const { toast } = useToast();
   
-  const permissions = usePermissions(spaceId);
-
   // Delete form mutation
   const deleteFormMutation = useMutation({
     mutationFn: async (formId: number) => {
@@ -106,6 +104,9 @@ export default function SpaceDetail() {
   }
 
   const { space, members = [], forms = [], userRole } = data as any;
+  
+  // Debug: log the user role to verify it's being passed correctly
+  console.log('Current user role:', userRole);
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(space.inviteCode);

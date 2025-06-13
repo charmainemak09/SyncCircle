@@ -14,13 +14,13 @@ export interface UserPermissions {
   canViewInviteCode: boolean;
 }
 
-export function usePermissions(spaceId?: number): UserPermissions {
-  const { data: userRole } = useQuery({
+export function usePermissions(spaceId?: number, userRole?: string): UserPermissions {
+  const { data: fetchedRole } = useQuery({
     queryKey: ['/api/spaces', spaceId, 'role'],
-    enabled: !!spaceId,
+    enabled: !!spaceId && !userRole,
   });
 
-  const role = userRole as string | undefined;
+  const role = userRole || (fetchedRole as string | undefined);
 
   return {
     isAdmin: role === 'admin',
