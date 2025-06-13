@@ -382,6 +382,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete form
+  app.delete("/api/forms/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const formId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const form = await storage.getForm(formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      // Check if user has admin access
+      const role = await storage.getSpaceMemberRole(form.spaceId, userId);
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete forms" });
+      }
+
+      const deleted = await storage.deleteForm(formId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete form" });
+      }
+
+      res.json({ message: "Form deleted successfully" });
+    } catch (error) {
+      console.error("Delete form error:", error);
+      res.status(500).json({ message: "Failed to delete form" });
+    }
+  });
+
   // Response routes
   app.get("/api/forms/:id/responses", isAuthenticated, async (req: any, res) => {
     try {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy, MoreVertical, Trash2, EyeOff, Eye } from "lucide-react";
 import { type Form } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function SpaceDetail() {
   const { id } = useParams();
@@ -19,6 +22,50 @@ export default function SpaceDetail() {
   const { toast } = useToast();
   
   const permissions = usePermissions(spaceId);
+
+  // Delete form mutation
+  const deleteFormMutation = useMutation({
+    mutationFn: async (formId: number) => {
+      const response = await apiRequest("DELETE", `/api/forms/${formId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
+      toast({
+        title: "Form deleted",
+        description: "The form has been permanently deleted.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete form. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toggle form active status mutation
+  const toggleFormMutation = useMutation({
+    mutationFn: async ({ formId, isActive }: { formId: number; isActive: boolean }) => {
+      const response = await apiRequest("PUT", `/api/forms/${formId}`, { isActive });
+      return response.json();
+    },
+    onSuccess: (_, { isActive }) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
+      toast({
+        title: isActive ? "Form published" : "Form unpublished",
+        description: isActive ? "The form is now active and visible to members." : "The form has been unpublished and is no longer visible to members.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update form status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: [`/api/spaces/${spaceId}`],
@@ -206,6 +253,65 @@ export default function SpaceDetail() {
                       <Badge className={getFormStatusColor(form)}>
                         {form.isActive ? "Active" : "Draft"}
                       </Badge>
+                      {permissions.canEditForms && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => toggleFormMutation.mutate({ 
+                                formId: form.id, 
+                                isActive: !form.isActive 
+                              })}
+                              disabled={toggleFormMutation.isPending}
+                            >
+                              {form.isActive ? (
+                                <>
+                                  <EyeOff className="w-4 h-4 mr-2" />
+                                  Unpublish
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Publish
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete Form
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Form</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{form.title}"? This action cannot be undone and will permanently remove all responses.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteFormMutation.mutate(form.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                    disabled={deleteFormMutation.isPending}
+                                  >
+                                    {deleteFormMutation.isPending ? "Deleting..." : "Delete"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </div>
 
