@@ -75,6 +75,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
       }
     },
     onSuccess: (response: any) => {
+      console.log("Image upload success:", response);
       onUpload(response.imageUrl);
       setSelectedFile(null);
       toast({
@@ -305,6 +306,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
       }
     },
     onSuccess: (response: any) => {
+      console.log("File upload success:", response);
       onUpload(response.fileUrl);
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -644,7 +646,12 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
   }, [answers]);
 
   const updateAnswer = (questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    console.log("Updating answer for question:", questionId, "with value:", value);
+    setAnswers(prev => {
+      const newAnswers = { ...prev, [questionId]: value };
+      console.log("New answers state:", newAnswers);
+      return newAnswers;
+    });
   };
 
   const handleSubmit = () => {
