@@ -104,7 +104,7 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
         }, 500);
       }
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -229,7 +229,10 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.profileImageUrl} alt={displayName} />
+            <AvatarImage 
+              src={user.profileImageUrl ? `${user.profileImageUrl}?t=${Date.now()}` : undefined} 
+              alt={displayName} 
+            />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -266,7 +269,10 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
                 <Label className="text-sm font-medium">Profile Picture</Label>
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={previewUrl || user.profileImageUrl} alt={displayName} />
+                    <AvatarImage 
+                      src={previewUrl || (user.profileImageUrl ? `${user.profileImageUrl}?t=${Date.now()}` : undefined)} 
+                      alt={displayName} 
+                    />
                     <AvatarFallback className="text-lg">{initials}</AvatarFallback>
                   </Avatar>
                   
