@@ -211,6 +211,14 @@ export default function FormBuilderPage() {
           </div>
         );
       
+      case "file":
+        return (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <p className="text-gray-500">File upload placeholder</p>
+            <p className="text-sm text-gray-400">JPEG, PNG, PDF up to 10MB</p>
+          </div>
+        );
+      
       default:
         return <p className="text-gray-500">Unknown question type</p>;
     }

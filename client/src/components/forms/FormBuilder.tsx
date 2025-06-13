@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit, Type, AlignLeft, List, Star, Image, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Edit, Type, AlignLeft, List, Star, Image, File, ChevronDown } from "lucide-react";
 import { type Question, type QuestionType } from "@shared/schema";
 
 interface FormBuilderProps {
@@ -27,6 +27,7 @@ const questionTypes = [
   { value: "multiple-choice", label: "Multiple Choice", icon: List },
   { value: "rating", label: "Rating Scale", icon: Star },
   { value: "image", label: "Image Upload", icon: Image },
+  { value: "file", label: "File Upload", icon: File },
 ] as const;
 
 export function FormBuilder({
