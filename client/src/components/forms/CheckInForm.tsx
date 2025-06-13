@@ -604,6 +604,7 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
     }),
     onSuccess: () => {
       setLastSaved(new Date());
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
     },
   });
 
