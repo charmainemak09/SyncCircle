@@ -21,6 +21,13 @@ export default function SpaceDetail() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const { toast } = useToast();
   
+  const { data, isLoading } = useQuery({
+    queryKey: [`/api/spaces/${spaceId}`],
+  });
+  
+  // Get permissions - this must be called at the top level, not conditionally
+  const permissions = usePermissions(spaceId, data?.userRole);
+  
   // Delete form mutation
   const deleteFormMutation = useMutation({
     mutationFn: async (formId: number) => {
@@ -31,7 +38,7 @@ export default function SpaceDetail() {
       queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
       toast({
         title: "Form deleted",
-        description: "The form has been permanently deleted.",
+        description: "The form has been successfully deleted.",
       });
     },
     onError: () => {
@@ -43,17 +50,19 @@ export default function SpaceDetail() {
     },
   });
 
-  // Toggle form active status mutation
-  const toggleFormMutation = useMutation({
+  // Toggle form status mutation
+  const toggleFormStatusMutation = useMutation({
     mutationFn: async ({ formId, isActive }: { formId: number; isActive: boolean }) => {
-      const response = await apiRequest("PUT", `/api/forms/${formId}`, { isActive });
+      const response = await apiRequest("PATCH", `/api/forms/${formId}`, {
+        isActive,
+      });
       return response.json();
     },
-    onSuccess: (_, { isActive }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
       toast({
-        title: isActive ? "Form published" : "Form unpublished",
-        description: isActive ? "The form is now active and visible to members." : "The form has been unpublished and is no longer visible to members.",
+        title: "Form updated",
+        description: "Form status has been updated successfully.",
       });
     },
     onError: () => {
@@ -63,10 +72,6 @@ export default function SpaceDetail() {
         variant: "destructive",
       });
     },
-  });
-
-  const { data, isLoading } = useQuery({
-    queryKey: [`/api/spaces/${spaceId}`],
   });
 
   if (isLoading) {
@@ -104,10 +109,13 @@ export default function SpaceDetail() {
   }
 
   const { space, members = [], forms = [], userRole } = data as any;
-  const permissions = usePermissions(spaceId, userRole);
   
   // Debug: log the user role to verify it's being passed correctly
-  console.log('Current user role:', userRole, 'Permissions:', permissions);
+  console.log('Current user role:', userRole, 'Permissions:', {
+    canInviteMembers: permissions.canInviteMembers,
+    canCreateForms: permissions.canCreateForms,
+    isAdmin: permissions.isAdmin
+  });
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(space.inviteCode);
@@ -120,12 +128,17 @@ export default function SpaceDetail() {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
-    if (diffInHours < 1) return "Just now";
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
+    
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays}d ago`;
+    
     return date.toLocaleDateString();
   };
 
@@ -224,158 +237,143 @@ export default function SpaceDetail() {
             <Card>
               <CardContent className="p-8 text-center">
                 <ClipboardCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No check-ins yet
-                </h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No check-ins yet</h3>
                 <p className="text-gray-600 mb-4">
-                  Create your first check-in form to start gathering team updates.
+                  Create your first check-in form to start collecting feedback from your team.
                 </p>
-                <Link href={`/spaces/${spaceId}/forms/new`}>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Check-in Form
-                  </Button>
-                </Link>
+                {permissions.canCreateForms && (
+                  <Link href={`/spaces/${spaceId}/forms/new`}>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Check-in
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           ) : (
-            forms.map((form: Form) => (
-              <Card key={form.id} className="hover:border-gray-300 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                        <ClipboardCheck className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{form.title}</h3>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <Calendar className="w-3 h-3" />
-                          <span>Every {form.frequency}</span>
-                          <Clock className="w-3 h-3" />
-                          <span>at {form.sendTime}</span>
+            <div className="grid gap-4">
+              {forms.map((form: Form) => (
+                <Card key={form.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">{form.title}</h3>
+                          <Badge variant="secondary" className={getFormStatusColor(form)}>
+                            {form.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                        {form.description && (
+                          <p className="text-gray-600 mb-3">{form.description}</p>
+                        )}
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>Created {formatTimeAgo(form.createdAt)}</span>
+                          </div>
+                          {form.frequency && (
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-4 h-4" />
+                              <span>
+                                {form.frequency.charAt(0).toUpperCase() + form.frequency.slice(1)}
+                                {form.sendTime && ` at ${form.sendTime}`}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getFormStatusColor(form)}>
-                        {form.isActive ? "Active" : "Draft"}
-                      </Badge>
-                      {permissions.canEditForms && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => toggleFormMutation.mutate({ 
-                                formId: form.id, 
-                                isActive: !form.isActive 
-                              })}
-                              disabled={toggleFormMutation.isPending}
-                            >
-                              {form.isActive ? (
-                                <>
-                                  <EyeOff className="w-4 h-4 mr-2" />
-                                  Unpublish
-                                </>
-                              ) : (
-                                <>
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  Publish
-                                </>
+                      <div className="flex items-center space-x-2">
+                        <Link href={`/forms/${form.id}/responses`}>
+                          <Button variant="outline" size="sm">
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            View Responses
+                          </Button>
+                        </Link>
+                        {permissions.canEditForms && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => toggleFormStatusMutation.mutate({
+                                  formId: form.id,
+                                  isActive: !form.isActive
+                                })}
+                              >
+                                {form.isActive ? (
+                                  <>
+                                    <EyeOff className="w-4 h-4 mr-2" />
+                                    Unpublish
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Publish
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              {permissions.canDeleteForms && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Form</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete "{form.title}"? This action cannot be undone and will remove all associated responses.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => deleteFormMutation.mutate(form.id)}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               )}
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Delete Form
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Form</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete "{form.title}"? This action cannot be undone and will permanently remove all responses.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => deleteFormMutation.mutate(form.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                    disabled={deleteFormMutation.isPending}
-                                  >
-                                    {deleteFormMutation.isPending ? "Deleting..." : "Delete"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-gray-900">--</div>
-                      <div className="text-sm text-gray-600">Total Responses</div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-gray-900">--</div>
-                      <div className="text-sm text-gray-600">Completion Rate</div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-gray-900">--</div>
-                      <div className="text-sm text-gray-600">Last Response</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <Link href={`/forms/${form.id}/responses`}>
-                      <Button variant="ghost" size="sm">View Responses</Button>
-                    </Link>
-                    <Link href={`/forms/${form.id}/edit`}>
-                      <Button variant="ghost" size="sm">Edit Form</Button>
-                    </Link>
-                    <Link href={`/forms/${form.id}/fill`}>
-                      <Button size="sm">Fill Out</Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="members" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-4">
             {members.map((member: any) => (
               <Card key={member.id}>
                 <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     <Avatar>
-                      <AvatarImage src={member.user.profileImageUrl || undefined} />
+                      <AvatarImage src={member.user.profileImage} />
                       <AvatarFallback>
-                        {member.user.firstName?.[0]}{member.user.lastName?.[0]}
+                        {member.user.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {member.user.firstName} {member.user.lastName}
-                      </p>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{member.user.username}</h4>
                       <p className="text-sm text-gray-600">{member.user.email}</p>
-                      <Badge variant={member.role === "admin" ? "default" : "secondary"} className="mt-1">
-                        {member.role}
-                      </Badge>
                     </div>
+                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
+                      {member.role}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -383,15 +381,13 @@ export default function SpaceDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="analytics">
+        <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardContent className="p-8 text-center">
               <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Analytics Coming Soon
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics coming soon</h3>
               <p className="text-gray-600">
-                Detailed analytics and insights will be available here once you have check-in data.
+                We're working on detailed analytics to help you understand your team's feedback patterns.
               </p>
             </CardContent>
           </Card>
