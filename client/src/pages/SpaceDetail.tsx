@@ -104,9 +104,10 @@ export default function SpaceDetail() {
   }
 
   const { space, members = [], forms = [], userRole } = data as any;
+  const permissions = usePermissions(spaceId, userRole);
   
   // Debug: log the user role to verify it's being passed correctly
-  console.log('Current user role:', userRole);
+  console.log('Current user role:', userRole, 'Permissions:', permissions);
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(space.inviteCode);
