@@ -10,6 +10,8 @@ export interface UserPermissions {
   canDeleteForms: boolean;
   canViewResponses: boolean;
   canEditOwnResponses: boolean;
+  canEditAllResponses: boolean;
+  canViewInviteCode: boolean;
 }
 
 export function usePermissions(spaceId?: number): UserPermissions {
@@ -23,12 +25,14 @@ export function usePermissions(spaceId?: number): UserPermissions {
   return {
     isAdmin: role === 'admin',
     isParticipant: role === 'participant',
-    canInviteMembers: role === 'admin',
+    canInviteMembers: role === 'admin', // Only admins can invite members
     canCreateForms: role === 'admin',
     canEditForms: role === 'admin', 
     canDeleteForms: role === 'admin',
     canViewResponses: true, // Both admin and participant can view all responses
     canEditOwnResponses: true, // Both can edit their own responses
+    canEditAllResponses: role === 'admin', // Only admins can edit any response
+    canViewInviteCode: role === 'admin', // Only admins can view invite code
   };
 }
 

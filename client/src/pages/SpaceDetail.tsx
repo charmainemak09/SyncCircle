@@ -143,12 +143,18 @@ export default function SpaceDetail() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{space.name}</h1>
             <p className="text-gray-600">
-              {members.length} members • Invite code: <code className="bg-gray-100 px-2 py-1 rounded text-sm">{space.inviteCode}</code>
+              {members.length} members
+              {permissions.canViewInviteCode && (
+                <>
+                  {" • Invite code: "}
+                  <code className="bg-gray-100 px-2 py-1 rounded text-sm">{space.inviteCode}</code>
+                </>
+              )}
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          {userRole === 'admin' && (
+          {permissions.canInviteMembers && (
             <>
               <Dialog>
                 <DialogTrigger asChild>

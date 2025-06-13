@@ -422,10 +422,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Form not found" });
       }
 
-      // Check if user has admin access
+      // Check if user is a space member (both admin and participant can view responses)
       const role = await storage.getSpaceMemberRole(form.spaceId, userId);
-      if (role !== "admin") {
-        return res.status(403).json({ message: "Only admins can view responses" });
+      if (!role) {
+        return res.status(403).json({ message: "Not a member of this space" });
       }
 
       const responses = await storage.getFormResponses(formId);
@@ -488,6 +488,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get my response error:", error);
       res.status(500).json({ message: "Failed to get response" });
+    }
+  });
+
+  // Update response with permission checks
+  app.put("/api/responses/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const responseId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const existingResponse = await storage.getResponse(responseId);
+      if (!existingResponse) {
+        return res.status(404).json({ message: "Response not found" });
+      }
+
+      const form = await storage.getForm(existingResponse.formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      const role = await storage.getSpaceMemberRole(form.spaceId, userId);
+      if (!role) {
+        return res.status(403).json({ message: "Not a member of this space" });
+      }
+
+      // Check permissions: user can edit their own response, or admin can edit any response
+      const canEdit = existingResponse.userId === userId || role === "admin";
+      if (!canEdit) {
+        return res.status(403).json({ message: "You can only edit your own responses" });
+      }
+
+      const updateData = req.body;
+      const updatedResponse = await storage.updateResponse(responseId, updateData);
+      res.json(updatedResponse);
+    } catch (error) {
+      console.error("Update response error:", error);
+      res.status(500).json({ message: "Failed to update response" });
     }
   });
 
