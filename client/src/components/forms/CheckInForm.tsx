@@ -61,9 +61,10 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
       
       try {
         const response = await apiRequest("POST", "/api/upload/form-image", formData);
+        const data = await response.json();
         clearInterval(progressInterval);
         setUploadProgress(100);
-        return response;
+        return data;
       } catch (error) {
         clearInterval(progressInterval);
         throw error;
@@ -292,9 +293,10 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
       
       try {
         const response = await apiRequest("POST", "/api/upload/form-file", formData);
+        const data = await response.json();
         clearInterval(progressInterval);
         setUploadProgress(100);
-        return response;
+        return data;
       } catch (error) {
         clearInterval(progressInterval);
         throw error;

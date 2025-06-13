@@ -91,9 +91,10 @@ export function ProfileDropdown({ user, onLogout }: ProfileDropdownProps) {
       
       try {
         const response = await apiRequest("POST", "/api/user/upload-avatar", formData);
+        const data = await response.json();
         clearInterval(progressInterval);
         setUploadProgress(100);
-        return response;
+        return data;
       } catch (error) {
         clearInterval(progressInterval);
         throw error;
