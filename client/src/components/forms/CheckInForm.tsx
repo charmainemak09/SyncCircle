@@ -144,54 +144,103 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
     }
   };
 
+  const handleRemoveImage = () => {
+    onUpload(""); // Clear the uploaded image
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`
-          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragOver 
-            ? 'border-primary bg-primary/5' 
-            : 'border-gray-300 hover:border-gray-400'
-          }
-          ${isUploading ? 'pointer-events-none opacity-50' : ''}
-        `}
-      >
-        <div className="flex flex-col items-center space-y-2">
-          {currentValue ? (
+      {currentValue && !selectedFile ? (
+        <div className="border rounded-lg p-4 bg-white shadow-sm">
+          <div className="mb-4">
             <img 
               src={currentValue} 
-              alt="Uploaded" 
-              className="max-w-full max-h-48 rounded-lg"
+              alt="Uploaded image" 
+              className="max-w-full max-h-48 rounded-lg object-contain border mx-auto"
             />
-          ) : (
-            <FileImage className="w-12 h-12 text-gray-400" />
-          )}
+          </div>
           
-          <div>
-            <p className="text-gray-600 mb-1">
-              {isDragOver 
-                ? 'Drop image here'
-                : currentValue
-                  ? 'Click to replace image'
-                  : 'Drop files here or click to upload'
-              }
-            </p>
-            <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <FileImage className="w-8 h-8 text-blue-500" />
+              <div>
+                <p className="font-medium text-sm">{currentValue.split('/').pop()}</p>
+                <p className="text-xs text-gray-500">Image File</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(currentValue, '_blank')}
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                View
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                Replace
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleRemoveImage}
+              >
+                <X className="w-4 h-4 mr-1" />
+                Remove
+              </Button>
+            </div>
           </div>
         </div>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-      </div>
+      ) : (
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`
+            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+            ${isDragOver 
+              ? 'border-primary bg-primary/5' 
+              : 'border-gray-300 hover:border-gray-400'
+            }
+            ${isUploading ? 'pointer-events-none opacity-50' : ''}
+          `}
+        >
+          <div className="flex flex-col items-center space-y-2">
+            <FileImage className="w-12 h-12 text-gray-400" />
+            
+            <div>
+              <p className="text-gray-600 mb-1">
+                {isDragOver 
+                  ? 'Drop image here'
+                  : 'Drop files here or click to upload'
+                }
+              </p>
+              <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
+            </div>
+          </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+      )}
 
       {isUploading && (
         <div className="space-y-2">
@@ -365,16 +414,39 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
     }
   };
 
+  const handleRemoveFile = () => {
+    onUpload(""); // Clear the uploaded file
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="space-y-4">
       {currentValue && !selectedFile ? (
-        <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="border rounded-lg p-4 bg-white shadow-sm">
+          {/* Show image preview if it's an image file */}
+          {currentValue.match(/\.(jpg|jpeg|png)$/i) && (
+            <div className="mb-4">
+              <img 
+                src={currentValue} 
+                alt="Uploaded file preview" 
+                className="max-w-full max-h-48 rounded-lg object-contain border"
+              />
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {getFileIcon(currentValue)}
               <div>
                 <p className="font-medium text-sm">{currentValue.split('/').pop()}</p>
-                <p className="text-xs text-gray-500">Uploaded file</p>
+                <p className="text-xs text-gray-500">
+                  {currentValue.match(/\.(pdf)$/i) ? 'PDF Document' : 
+                   currentValue.match(/\.(jpg|jpeg|png)$/i) ? 'Image File' : 'Uploaded file'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -404,6 +476,15 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
               >
                 <Upload className="w-4 h-4 mr-1" />
                 Replace
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleRemoveFile}
+              >
+                <X className="w-4 h-4 mr-1" />
+                Remove
               </Button>
             </div>
           </div>
