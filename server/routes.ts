@@ -5,12 +5,73 @@ import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertSpaceSchema, insertFormSchema, insertResponseSchema } from "@shared/schema";
+import { insertSpaceSchema, insertFormSchema, insertResponseSchema, type InsertNotification } from "@shared/schema";
 import { z } from "zod";
 
 // Generate a random invite code
 function generateInviteCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// Helper function to create form reminder notifications
+async function createFormReminderNotifications(formId: number): Promise<void> {
+  try {
+    const form = await storage.getForm(formId);
+    if (!form || !form.isActive) return;
+
+    const spaceMembers = await storage.getSpaceMembers(form.spaceId);
+    const deadlineHours = form.deadlineDuration || 24;
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + deadlineHours);
+
+    const notifications: InsertNotification[] = spaceMembers.map(member => ({
+      userId: member.userId,
+      spaceId: form.spaceId,
+      type: "form_reminder",
+      title: "New Check-in Form Available",
+      message: `A new check-in form "${form.title}" has been posted. Submit your response before ${deadline.toLocaleDateString()} ${deadline.toLocaleTimeString()}.`,
+      formId: form.id,
+      isRead: false
+    }));
+
+    for (const notification of notifications) {
+      await storage.createNotification(notification);
+    }
+  } catch (error) {
+    console.error("Error creating form reminder notifications:", error);
+  }
+}
+
+// Helper function to create new response notifications
+async function createNewResponseNotifications(formId: number, submitterUserId: string): Promise<void> {
+  try {
+    const form = await storage.getForm(formId);
+    if (!form) return;
+
+    const submitter = await storage.getUser(submitterUserId);
+    if (!submitter) return;
+
+    const spaceMembers = await storage.getSpaceMembers(form.spaceId);
+    
+    // Notify all members except the submitter
+    const notifications: InsertNotification[] = spaceMembers
+      .filter(member => member.userId !== submitterUserId)
+      .map(member => ({
+        userId: member.userId,
+        spaceId: form.spaceId,
+        type: "new_response",
+        title: "New Response Submitted",
+        message: `${submitter.firstName} ${submitter.lastName} has submitted their response to "${form.title}". Click to view.`,
+        formId: form.id,
+        isRead: false
+      }));
+
+    for (const notification of notifications) {
+      await storage.createNotification(notification);
+    }
+  } catch (error) {
+    console.error("Error creating new response notifications:", error);
+  }
 }
 
 // Configure multer for file uploads
@@ -425,6 +486,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to update form" });
       }
       
+      // If form was activated, create form reminder notifications
+      if (updates.isActive === true && !form.isActive) {
+        await createFormReminderNotifications(formId);
+      }
+      
       res.json(updatedForm);
     } catch (error) {
       console.error("Patch form error:", error);
@@ -609,6 +675,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Update response error:", error);
       res.status(500).json({ message: "Failed to update response" });
+    }
+  });
+
+  // Notification routes
+  app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ message: "Failed to get notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Get unread count error:", error);
+      res.status(500).json({ message: "Failed to get unread count" });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      if (isNaN(notificationId)) {
+        return res.status(400).json({ message: "Invalid notification ID" });
+      }
+      
+      const success = await storage.markNotificationAsRead(notificationId);
+      if (!success) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mark notification read error:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/mark-all-read", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const success = await storage.markAllNotificationsAsRead(userId);
+      res.json({ success });
+    } catch (error) {
+      console.error("Mark all notifications read error:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 
