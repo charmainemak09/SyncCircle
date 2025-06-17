@@ -35,12 +35,14 @@ export default function FormBuilderPage() {
 
   // Load existing form data if editing
   const { data: existingForm, isLoading } = useQuery<{
+    id: number;
     title: string;
     description: string | null;
     questions: Question[];
     frequency: string;
     sendTime: string;
     startDate: string;
+    spaceId: number;
   }>({
     queryKey: [`/api/forms/${formId}`],
     enabled: isEditing,
@@ -70,12 +72,15 @@ export default function FormBuilderPage() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
+      const targetSpaceId = isEditing ? existingForm?.spaceId : spaceId;
+      if (targetSpaceId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/spaces/${targetSpaceId}`] });
+      }
       toast({
         title: isEditing ? "Form updated successfully" : "Form created successfully",
         description: "Your check-in form is ready to use.",
       });
-      setLocation(`/spaces/${spaceId}`);
+      setLocation(`/spaces/${targetSpaceId || spaceId}`);
     },
     onError: (error: any) => {
       toast({
