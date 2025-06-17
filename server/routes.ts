@@ -237,6 +237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/spaces/:id", isAuthenticated, async (req: any, res) => {
     try {
       const spaceId = parseInt(req.params.id);
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
       const userId = req.user.claims.sub;
 
       const space = await storage.getSpace(spaceId);
@@ -264,6 +267,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/spaces/:id/role", isAuthenticated, async (req: any, res) => {
     try {
       const spaceId = parseInt(req.params.id);
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
       const userId = req.user.claims.sub;
 
       const role = await storage.getSpaceMemberRole(spaceId, userId);
@@ -368,6 +374,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/forms/:id", isAuthenticated, async (req: any, res) => {
     try {
       const formId = parseInt(req.params.id);
+      if (isNaN(formId)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
       const userId = req.user.claims.sub;
 
       const form = await storage.getForm(formId);
@@ -390,10 +399,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH endpoint for partial form updates (like status changes)
+  app.patch("/api/forms/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const formId = parseInt(req.params.id);
+      if (isNaN(formId)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+      const userId = req.user.claims.sub;
+
+      const form = await storage.getForm(formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      // Check if user has admin access
+      const role = await storage.getSpaceMemberRole(form.spaceId, userId);
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can edit forms" });
+      }
+
+      const updates = req.body;
+      const updatedForm = await storage.updateForm(formId, updates);
+      if (!updatedForm) {
+        return res.status(500).json({ message: "Failed to update form" });
+      }
+      
+      res.json(updatedForm);
+    } catch (error) {
+      console.error("Patch form error:", error);
+      res.status(500).json({ message: "Failed to update form" });
+    }
+  });
+
   // Delete form
   app.delete("/api/forms/:id", isAuthenticated, async (req: any, res) => {
     try {
       const formId = parseInt(req.params.id);
+      if (isNaN(formId)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
       const userId = req.user.claims.sub;
 
       const form = await storage.getForm(formId);
