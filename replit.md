@@ -144,6 +144,8 @@ Changelog:
 - June 17, 2025. Implemented recurring response functionality allowing multiple submissions per user per form
 - June 17, 2025. Added draft-only system for form responses to support recurring submissions
 - June 17, 2025. Enhanced UI to indicate multiple responses are allowed
+- June 17, 2025. Added Submit Response button for each check-in form on space detail page
+- June 17, 2025. Implemented deadline duration setting in form configuration (1 hour to 1 week options)
 ```
 
 ## User Preferences

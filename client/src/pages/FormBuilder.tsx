@@ -59,6 +59,7 @@ export default function FormBuilderPage() {
       setFrequency(existingForm.frequency);
       setSendTime(existingForm.sendTime);
       setStartDate(existingForm.startDate || new Date().toISOString().split('T')[0]);
+      setDeadlineDuration(existingForm.deadlineDuration || 24);
     }
   }, [existingForm]);
 
@@ -130,6 +131,7 @@ export default function FormBuilderPage() {
       frequency,
       sendTime,
       startDate,
+      deadlineDuration,
       isActive: true,
     });
   };
@@ -360,6 +362,8 @@ export default function FormBuilderPage() {
             onSendTimeChange={setSendTime}
             startDate={startDate}
             onStartDateChange={setStartDate}
+            deadlineDuration={deadlineDuration}
+            onDeadlineDurationChange={setDeadlineDuration}
           />
         </CardContent>
       </Card>
