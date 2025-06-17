@@ -622,9 +622,12 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
     onSuccess: () => {
       toast({
         title: "Response submitted successfully",
-        description: "Thank you for your check-in!",
+        description: "Thank you for your check-in! You can submit another response anytime.",
       });
       queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      // Clear the form for a new response
+      setAnswers({});
+      setLastSaved(null);
       onSubmit?.();
     },
     onError: (error: any) => {
@@ -693,8 +696,14 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{form.title}</h2>
         {form.description && (
-          <p className="text-gray-600">{form.description}</p>
+          <p className="text-gray-600 mb-3">{form.description}</p>
         )}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+          <div className="flex items-center justify-center space-x-2">
+            <Send className="w-4 h-4" />
+            <span>You can submit multiple responses to this check-in form</span>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">

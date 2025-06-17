@@ -548,6 +548,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's response history for a form
+  app.get("/api/forms/:id/my-responses", isAuthenticated, async (req: any, res) => {
+    try {
+      const formId = parseInt(req.params.id);
+      if (isNaN(formId)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+      const userId = req.user.claims.sub;
+
+      const form = await storage.getForm(formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      // Check if user is member
+      const isMember = await storage.isSpaceMember(form.spaceId, userId);
+      if (!isMember) {
+        return res.status(403).json({ message: "Not a member of this space" });
+      }
+
+      const responses = await storage.getUserFormResponses(formId, userId);
+      res.json(responses);
+    } catch (error) {
+      console.error("Get my responses error:", error);
+      res.status(500).json({ message: "Failed to get responses" });
+    }
+  });
+
   // Update response with permission checks
   app.put("/api/responses/:id", isAuthenticated, async (req: any, res) => {
     try {
