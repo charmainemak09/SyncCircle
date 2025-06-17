@@ -364,7 +364,7 @@ export default function SpaceDetail() {
                     <Avatar>
                       <AvatarImage src={member.user.profileImage} />
                       <AvatarFallback>
-                        {member.user.username.slice(0, 2).toUpperCase()}
+                        {member.user.username?.slice(0, 2).toUpperCase() || "UN"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
