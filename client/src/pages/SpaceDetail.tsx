@@ -110,12 +110,11 @@ export default function SpaceDetail() {
 
   const { space, members = [], forms = [], userRole } = data as any;
   
+  // Check if form limit is reached (max 5 forms per space)
+  const hasReachedFormLimit = forms.length >= 5;
+  
   // Debug: log the user role to verify it's being passed correctly
-  console.log('Current user role:', userRole, 'Permissions:', {
-    canInviteMembers: permissions.canInviteMembers,
-    canCreateForms: permissions.canCreateForms,
-    isAdmin: permissions.isAdmin
-  });
+  console.log('Current user role:', userRole, 'Forms count:', forms.length, 'Limit reached:', hasReachedFormLimit);
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(space.inviteCode);
@@ -200,12 +199,19 @@ export default function SpaceDetail() {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Link href={`/spaces/${spaceId}/forms/new`}>
-                <Button>
+              {hasReachedFormLimit ? (
+                <Button disabled>
                   <Plus className="w-4 h-4 mr-2" />
-                  New Check-in
+                  New Check-in (5/5 limit reached)
                 </Button>
-              </Link>
+              ) : (
+                <Link href={`/spaces/${spaceId}/forms/new`}>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Check-in ({forms.length}/5)
+                  </Button>
+                </Link>
+              )}
             </>
           )}
           <Button variant="outline">
@@ -233,6 +239,19 @@ export default function SpaceDetail() {
         </TabsList>
 
         <TabsContent value="checkins" className="space-y-4">
+          {/* Form count header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <h3 className="text-lg font-semibold text-gray-900">Check-in Forms</h3>
+              <Badge variant="outline" className={hasReachedFormLimit ? "text-red-600 border-red-300" : "text-gray-600"}>
+                {forms.length}/5
+              </Badge>
+            </div>
+            {hasReachedFormLimit && (
+              <p className="text-sm text-red-600">Maximum limit reached</p>
+            )}
+          </div>
+          
           {forms.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
@@ -240,12 +259,14 @@ export default function SpaceDetail() {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No check-ins yet</h3>
                 <p className="text-gray-600 mb-4">
                   Create your first check-in form to start collecting feedback from your team.
+                  <br />
+                  <span className="text-sm text-gray-500">You can create up to 5 check-in forms per space.</span>
                 </p>
                 {permissions.canCreateForms && (
                   <Link href={`/spaces/${spaceId}/forms/new`}>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
-                      Create Check-in
+                      Create Check-in (0/5)
                     </Button>
                   </Link>
                 )}

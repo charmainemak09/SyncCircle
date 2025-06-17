@@ -322,6 +322,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only admins can create forms" });
       }
 
+      // Check if space already has 5 forms (maximum limit)
+      const existingForms = await storage.getSpaceForms(formData.spaceId);
+      if (existingForms.length >= 5) {
+        return res.status(400).json({ 
+          message: "Maximum limit reached. Each space can only have 5 check-in forms." 
+        });
+      }
+
       const form = await storage.createForm(formData);
       res.json(form);
     } catch (error) {
