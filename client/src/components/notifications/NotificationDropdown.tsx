@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
+import { useLocation } from "wouter";
 import type { Notification } from "@shared/schema";
 
 interface NotificationDropdownProps {
@@ -21,6 +22,8 @@ interface NotificationDropdownProps {
 }
 
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
+  const [, setLocation] = useLocation();
+  
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
   });
@@ -62,8 +65,20 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const unreadCount = unreadCountData?.count || 0;
 
   const handleNotificationClick = (notification: Notification) => {
+    // Mark as read if unread
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
+    }
+    
+    // Navigate based on notification type
+    if (notification.formId) {
+      if (notification.type === "form_reminder") {
+        // Navigate to fill form page
+        setLocation(`/fill-form/${notification.formId}`);
+      } else if (notification.type === "new_response") {
+        // Navigate to view responses page
+        setLocation(`/view-responses/${notification.formId}`);
+      }
     }
   };
 

@@ -45,27 +45,16 @@ async function createFormReminderNotifications(formId: number): Promise<void> {
 // Helper function to create new response notifications
 async function createNewResponseNotifications(formId: number, submitterUserId: string): Promise<void> {
   try {
-    console.log(`Creating notifications for response to form ${formId} by user ${submitterUserId}`);
-    
     const form = await storage.getForm(formId);
-    if (!form) {
-      console.log("Form not found for notifications");
-      return;
-    }
+    if (!form) return;
 
     const submitter = await storage.getUser(submitterUserId);
-    if (!submitter) {
-      console.log("Submitter user not found for notifications");
-      return;
-    }
+    if (!submitter) return;
 
     const spaceMembers = await storage.getSpaceMembers(form.spaceId);
-    console.log(`Found ${spaceMembers.length} space members:`, spaceMembers.map(m => m.userId));
-    console.log(`Submitter ID: ${submitterUserId}`);
     
     // Notify all members except the submitter
     const otherMembers = spaceMembers.filter(member => member.userId !== submitterUserId);
-    console.log(`Other members to notify:`, otherMembers.map(m => m.userId));
     
     const notifications: InsertNotification[] = otherMembers.map(member => ({
         userId: member.userId,
@@ -76,12 +65,9 @@ async function createNewResponseNotifications(formId: number, submitterUserId: s
         formId: form.id,
         isRead: false
       }));
-
-    console.log(`Creating ${notifications.length} notifications`);
     
     for (const notification of notifications) {
       await storage.createNotification(notification);
-      console.log(`Created notification for user ${notification.userId}`);
     }
   } catch (error) {
     console.error("Error creating new response notifications:", error);
@@ -597,19 +583,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let response;
       if (responseData.isDraft && existingDraft) {
         // Update existing draft
-        console.log("Updating existing draft response");
         response = await storage.updateResponse(existingDraft.id, responseData);
       } else {
         // Create new response (draft or final submission)
-        console.log(`Creating new response - isDraft: ${responseData.isDraft}`);
         response = await storage.createResponse(responseData);
         
         // If this is a final submission (not draft), create notifications
         if (!responseData.isDraft) {
-          console.log("Creating notifications for final submission");
           await createNewResponseNotifications(responseData.formId, userId);
-        } else {
-          console.log("Skipping notifications for draft response");
         }
       }
 
