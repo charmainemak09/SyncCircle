@@ -54,6 +54,7 @@ export const forms = pgTable("forms", {
   frequency: text("frequency").notNull(), // "daily" | "weekly" | "biweekly" | "monthly"
   sendTime: text("send_time").notNull(), // "HH:MM" format
   startDate: text("start_date").notNull(), // "YYYY-MM-DD" format
+  deadlineDuration: integer("deadline_duration").default(24).notNull(), // Hours to complete after form is sent
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

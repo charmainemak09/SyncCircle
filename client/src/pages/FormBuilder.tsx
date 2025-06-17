@@ -30,6 +30,7 @@ export default function FormBuilderPage() {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
+  const [deadlineDuration, setDeadlineDuration] = useState(24);
 
   const isEditing = !!formId;
 
@@ -42,6 +43,7 @@ export default function FormBuilderPage() {
     frequency: string;
     sendTime: string;
     startDate: string;
+    deadlineDuration: number;
     spaceId: number;
   }>({
     queryKey: [`/api/forms/${formId}`],

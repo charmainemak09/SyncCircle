@@ -19,6 +19,8 @@ interface FormBuilderProps {
   onSendTimeChange: (sendTime: string) => void;
   startDate: string;
   onStartDateChange: (startDate: string) => void;
+  deadlineDuration: number;
+  onDeadlineDurationChange: (duration: number) => void;
 }
 
 const questionTypes = [
@@ -41,6 +43,8 @@ export function FormBuilder({
   onSendTimeChange,
   startDate,
   onStartDateChange,
+  deadlineDuration,
+  onDeadlineDurationChange,
 }: FormBuilderProps) {
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
 
@@ -308,6 +312,33 @@ export function FormBuilder({
                     value={startDate}
                     onChange={(e) => onStartDateChange(e.target.value)}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Response Deadline (Hours)
+                  </label>
+                  <Select 
+                    value={deadlineDuration.toString()} 
+                    onValueChange={(value) => onDeadlineDurationChange(parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 hour</SelectItem>
+                      <SelectItem value="2">2 hours</SelectItem>
+                      <SelectItem value="4">4 hours</SelectItem>
+                      <SelectItem value="8">8 hours</SelectItem>
+                      <SelectItem value="12">12 hours</SelectItem>
+                      <SelectItem value="24">24 hours (1 day)</SelectItem>
+                      <SelectItem value="48">48 hours (2 days)</SelectItem>
+                      <SelectItem value="72">72 hours (3 days)</SelectItem>
+                      <SelectItem value="168">168 hours (1 week)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Users have this much time to submit their response after the form is sent
+                  </p>
                 </div>
               </div>
             </CardContent>
