@@ -68,6 +68,19 @@ export const responses = pgTable("responses", {
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id).notNull(),
+  spaceId: integer("space_id").references(() => spaces.id).notNull(),
+  type: text("type").notNull(), // "form_reminder" | "new_response"
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  formId: integer("form_id").references(() => forms.id),
+  responseId: integer("response_id").references(() => responses.id),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -95,6 +108,11 @@ export const insertResponseSchema = createInsertSchema(responses).omit({
   submittedAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -111,6 +129,9 @@ export type InsertForm = z.infer<typeof insertFormSchema>;
 
 export type Response = typeof responses.$inferSelect;
 export type InsertResponse = z.infer<typeof insertResponseSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 // Question types
 export type QuestionType = "text" | "textarea" | "multiple-choice" | "rating" | "image" | "file";

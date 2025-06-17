@@ -1,10 +1,11 @@
 import { 
-  users, spaces, spaceMembers, forms, responses,
+  users, spaces, spaceMembers, forms, responses, notifications,
   type User, type UpsertUser,
   type Space, type InsertSpace,
   type SpaceMember, type InsertSpaceMember,
   type Form, type InsertForm,
-  type Response, type InsertResponse
+  type Response, type InsertResponse,
+  type Notification, type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count } from "drizzle-orm";
@@ -48,6 +49,13 @@ export interface IStorage {
     completionRate: number;
     averageRating?: number;
   }>;
+
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<boolean>;
+  markAllNotificationsAsRead(userId: string): Promise<boolean>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
