@@ -146,6 +146,10 @@ Changelog:
 - June 17, 2025. Enhanced UI to indicate multiple responses are allowed
 - June 17, 2025. Added Submit Response button for each check-in form on space detail page
 - June 17, 2025. Implemented deadline duration setting in form configuration (1 hour to 1 week options)
+- June 17, 2025. Implemented comprehensive notification system with form reminder and new response notifications
+- June 17, 2025. Added notification database schema with read/unread states and notification types
+- June 17, 2025. Created notification dropdown UI component in header with unread count badge
+- June 17, 2025. Integrated automatic notification creation when forms are activated and responses submitted
 ```
 
 ## User Preferences
