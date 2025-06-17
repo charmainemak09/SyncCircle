@@ -325,6 +325,12 @@ export default function SpaceDetail() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <Link href={`/forms/${form.id}/edit`}>
+                                <DropdownMenuItem>
+                                  <Settings className="w-4 h-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                              </Link>
                               <DropdownMenuItem
                                 onClick={() => toggleFormStatusMutation.mutate({
                                   formId: form.id,
