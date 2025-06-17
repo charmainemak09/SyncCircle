@@ -147,50 +147,53 @@ export default function SpaceDetail() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
       {/* Space Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl">
-            <Users className="w-8 h-8" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-indigo-600 rounded-xl flex items-center justify-center text-white text-lg sm:text-xl">
+            <Users className="w-6 h-6 sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{space.name}</h1>
-            <p className="text-gray-600">
-              {members.length} members
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{space.name}</h1>
+            <div className="text-sm sm:text-base text-gray-600">
+              <span>{members.length} members</span>
               {permissions.canViewInviteCode && (
-                <>
-                  {" • Invite code: "}
-                  <code className="bg-gray-100 px-2 py-1 rounded text-sm">{space.inviteCode}</code>
-                </>
+                <div className="mt-1 sm:mt-0 sm:inline">
+                  <span className="hidden sm:inline"> • Invite code: </span>
+                  <span className="sm:hidden block text-xs text-gray-500">Invite code:</span>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-xs sm:text-sm ml-0 sm:ml-1">{space.inviteCode}</code>
+                </div>
               )}
-            </p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
           {permissions.canInviteMembers && (
             <>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Invite Member
+                    <span className="hidden sm:inline">Invite Member</span>
+                    <span className="sm:hidden">Invite</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="mx-4 sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Invite Team Members</DialogTitle>
+                    <DialogTitle className="text-lg sm:text-xl">Invite Team Members</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">
                       Share this invite code with team members to add them to {space.name}:
                     </p>
-                    <div className="flex items-center space-x-2">
-                      <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-lg font-mono text-center">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                      <code className="flex-1 bg-gray-100 px-3 py-3 sm:py-2 rounded text-base sm:text-lg font-mono text-center break-all">
                         {space.inviteCode}
                       </code>
-                      <Button size="sm" variant="outline" onClick={copyInviteCode}>
-                        <Copy className="w-4 h-4" />
+                      <Button size="sm" variant="outline" onClick={copyInviteCode} className="w-full sm:w-auto">
+                        <Copy className="w-4 h-4 mr-2 sm:mr-0" />
+                        <span className="sm:hidden">Copy Code</span>
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500">
@@ -200,21 +203,23 @@ export default function SpaceDetail() {
                 </DialogContent>
               </Dialog>
               {hasReachedFormLimit ? (
-                <Button disabled>
+                <Button disabled className="w-full sm:w-auto">
                   <Plus className="w-4 h-4 mr-2" />
-                  New Check-in (5/5 limit reached)
+                  <span className="hidden sm:inline">New Check-in (5/5 limit reached)</span>
+                  <span className="sm:hidden">Limit Reached (5/5)</span>
                 </Button>
               ) : (
                 <Link href={`/spaces/${spaceId}/forms/new`}>
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
-                    New Check-in ({forms.length}/5)
+                    <span className="hidden sm:inline">New Check-in ({forms.length}/5)</span>
+                    <span className="sm:hidden">New ({forms.length}/5)</span>
                   </Button>
                 </Link>
               )}
             </>
           )}
-          <Button variant="outline">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>
@@ -240,9 +245,9 @@ export default function SpaceDetail() {
 
         <TabsContent value="checkins" className="space-y-4">
           {/* Form count header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
             <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-semibold text-gray-900">Check-in Forms</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Check-in Forms</h3>
               <Badge variant="outline" className={hasReachedFormLimit ? "text-red-600 border-red-300" : "text-gray-600"}>
                 {forms.length}/5
               </Badge>
@@ -276,26 +281,26 @@ export default function SpaceDetail() {
             <div className="grid gap-4">
               {forms.map((form: Form) => (
                 <Card key={form.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{form.title}</h3>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{form.title}</h3>
                           <Badge variant="secondary" className={getFormStatusColor(form)}>
                             {form.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </div>
                         {form.description && (
-                          <p className="text-gray-600 mb-3">{form.description}</p>
+                          <p className="text-gray-600 mb-3 text-sm sm:text-base line-clamp-2">{form.description}</p>
                         )}
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-500">
                           <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4" />
+                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                             <span>Created {formatTimeAgo(form.createdAt)}</span>
                           </div>
                           {form.frequency && (
                             <div className="flex items-center space-x-1">
-                              <Clock className="w-4 h-4" />
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                               <span>
                                 {form.frequency.charAt(0).toUpperCase() + form.frequency.slice(1)}
                                 {form.sendTime && ` at ${form.sendTime}`}
@@ -304,11 +309,12 @@ export default function SpaceDetail() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                         <Link href={`/forms/${form.id}/responses`}>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
                             <BarChart3 className="w-4 h-4 mr-2" />
-                            View Responses
+                            <span className="hidden sm:inline">View Responses</span>
+                            <span className="sm:hidden">Responses</span>
                           </Button>
                         </Link>
                         {permissions.canEditForms && (
@@ -377,22 +383,22 @@ export default function SpaceDetail() {
         </TabsContent>
 
         <TabsContent value="members" className="space-y-4">
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {members.map((member: any) => (
               <Card key={member.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <Avatar>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
                       <AvatarImage src={member.user.profileImage} />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-xs sm:text-sm">
                         {member.user.username?.slice(0, 2).toUpperCase() || "UN"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{member.user.username}</h4>
-                      <p className="text-sm text-gray-600">{member.user.email}</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">{member.user.username}</h4>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{member.user.email}</p>
                     </div>
-                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
+                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
                       {member.role}
                     </Badge>
                   </div>

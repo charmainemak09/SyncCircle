@@ -133,6 +133,9 @@ SyncCircle is a team check-in application that enables organizations to create s
 ```
 Changelog:
 - June 13, 2025. Initial setup
+- June 13, 2025. Implemented role-based access control for UI buttons
+- June 13, 2025. Added 5-form limit per space with backend validation
+- June 13, 2025. Fixed mobile UI display with responsive design
 ```
 
 ## User Preferences
