@@ -26,7 +26,7 @@ export default function SpaceDetail() {
   });
   
   // Get user role for this space
-  const { data: roleData } = useQuery({
+  const { data: roleData } = useQuery<string>({
     queryKey: [`/api/spaces/${spaceId}/role`],
     enabled: !!spaceId,
   });
@@ -302,7 +302,7 @@ export default function SpaceDetail() {
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-500">
                           <div className="flex items-center space-x-1">
                             <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span>Created {formatTimeAgo(form.createdAt.toString())}</span>
+                            <span>Created {formatTimeAgo(typeof form.createdAt === 'string' ? form.createdAt : form.createdAt.toISOString())}</span>
                           </div>
                           {form.frequency && (
                             <div className="flex items-center space-x-1">
