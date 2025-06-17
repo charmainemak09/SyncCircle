@@ -39,6 +39,7 @@ export interface IStorage {
   getResponse(id: number): Promise<Response | undefined>;
   getFormResponses(formId: number): Promise<(Response & { user: User })[]>;
   getUserFormResponse(formId: number, userId: string): Promise<Response | undefined>;
+  getUserFormDraft(formId: number, userId: string): Promise<Response | undefined>;
   createResponse(response: InsertResponse): Promise<Response>;
   updateResponse(id: number, updates: Partial<InsertResponse>): Promise<Response | undefined>;
   getFormResponseStats(formId: number): Promise<{
@@ -240,6 +241,20 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(responses.submittedAt));
 
     return response || undefined;
+  }
+
+  async getUserFormDraft(formId: number, userId: string): Promise<Response | undefined> {
+    const [draft] = await db
+      .select()
+      .from(responses)
+      .where(and(
+        eq(responses.formId, formId), 
+        eq(responses.userId, userId),
+        eq(responses.isDraft, true)
+      ))
+      .orderBy(desc(responses.submittedAt));
+
+    return draft || undefined;
   }
 
   async createResponse(response: InsertResponse): Promise<Response> {

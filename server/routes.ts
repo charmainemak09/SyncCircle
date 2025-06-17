@@ -510,13 +510,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not a member of this space" });
       }
 
-      // Check if user already has a response for this form
-      const existingResponse = await storage.getUserFormResponse(responseData.formId, userId);
+      // For recurring responses, check if there's an existing draft to update
+      // Otherwise, create a new response (allowing multiple submissions)
+      const existingDraft = await storage.getUserFormDraft(responseData.formId, userId);
       
       let response;
-      if (existingResponse) {
-        response = await storage.updateResponse(existingResponse.id, responseData);
+      if (responseData.isDraft && existingDraft) {
+        // Update existing draft
+        response = await storage.updateResponse(existingDraft.id, responseData);
       } else {
+        // Create new response (draft or final submission)
         response = await storage.createResponse(responseData);
       }
 
@@ -536,8 +539,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
 
-      const response = await storage.getUserFormResponse(formId, userId);
-      res.json(response);
+      // For recurring responses, only return the latest draft (if any)
+      const draft = await storage.getUserFormDraft(formId, userId);
+      res.json(draft);
     } catch (error) {
       console.error("Get my response error:", error);
       res.status(500).json({ message: "Failed to get response" });
