@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy, MoreVertical, Trash2, EyeOff, Eye } from "lucide-react";
+import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy, MoreVertical, Trash2, EyeOff, Eye, Send } from "lucide-react";
 import { type Form } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -316,6 +316,13 @@ export default function SpaceDetail() {
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                        <Link href={`/forms/${form.id}/fill`}>
+                          <Button size="sm" className="w-full sm:w-auto">
+                            <Send className="w-4 h-4 mr-2" />
+                            <span className="hidden sm:inline">Submit Response</span>
+                            <span className="sm:hidden">Submit</span>
+                          </Button>
+                        </Link>
                         <Link href={`/forms/${form.id}/responses`}>
                           <Button variant="outline" size="sm" className="w-full sm:w-auto">
                             <BarChart3 className="w-4 h-4 mr-2" />
