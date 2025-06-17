@@ -25,8 +25,14 @@ export default function SpaceDetail() {
     queryKey: [`/api/spaces/${spaceId}`],
   });
   
+  // Get user role for this space
+  const { data: roleData } = useQuery({
+    queryKey: [`/api/spaces/${spaceId}/role`],
+    enabled: !!spaceId,
+  });
+  
   // Get permissions - this must be called at the top level, not conditionally
-  const permissions = usePermissions(spaceId, data?.userRole);
+  const permissions = usePermissions(spaceId, roleData);
   
   // Delete form mutation
   const deleteFormMutation = useMutation({
@@ -296,7 +302,7 @@ export default function SpaceDetail() {
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-500">
                           <div className="flex items-center space-x-1">
                             <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span>Created {formatTimeAgo(form.createdAt)}</span>
+                            <span>Created {formatTimeAgo(form.createdAt.toString())}</span>
                           </div>
                           {form.frequency && (
                             <div className="flex items-center space-x-1">
