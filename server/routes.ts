@@ -587,6 +587,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Create new response (draft or final submission)
         response = await storage.createResponse(responseData);
+        
+        // If this is a final submission (not draft), create notifications
+        if (!responseData.isDraft) {
+          await createNewResponseNotifications(responseData.formId, userId);
+        }
       }
 
       res.json(response);

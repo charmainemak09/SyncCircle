@@ -14,6 +14,7 @@ import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile/ProfileDropdown";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Link } from "wouter";
 
 function AppNavigation() {
@@ -34,9 +35,7 @@ function AppNavigation() {
         </Link>
         
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
+          <NotificationDropdown />
           <ProfileDropdown 
             user={user as any}
             onLogout={handleLogout}
