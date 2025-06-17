@@ -60,12 +60,14 @@ async function createNewResponseNotifications(formId: number, submitterUserId: s
     }
 
     const spaceMembers = await storage.getSpaceMembers(form.spaceId);
-    console.log(`Found ${spaceMembers.length} space members`);
+    console.log(`Found ${spaceMembers.length} space members:`, spaceMembers.map(m => m.userId));
+    console.log(`Submitter ID: ${submitterUserId}`);
     
     // Notify all members except the submitter
-    const notifications: InsertNotification[] = spaceMembers
-      .filter(member => member.userId !== submitterUserId)
-      .map(member => ({
+    const otherMembers = spaceMembers.filter(member => member.userId !== submitterUserId);
+    console.log(`Other members to notify:`, otherMembers.map(m => m.userId));
+    
+    const notifications: InsertNotification[] = otherMembers.map(member => ({
         userId: member.userId,
         spaceId: form.spaceId,
         type: "new_response",
