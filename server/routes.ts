@@ -398,6 +398,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const form = await storage.createForm(formData);
+      
+      // If form is created as active, create form reminder notifications
+      if (form.isActive) {
+        await createFormReminderNotifications(form.id);
+      }
+      
       res.json(form);
     } catch (error) {
       if (error instanceof z.ZodError) {
