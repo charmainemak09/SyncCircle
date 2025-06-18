@@ -20,20 +20,20 @@ export default function SpaceDetail() {
   const spaceId = parseInt(id!);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const { toast } = useToast();
-  
+
   const { data, isLoading } = useQuery({
     queryKey: [`/api/spaces/${spaceId}`],
   });
-  
+
   // Get user role for this space
   const { data: roleData } = useQuery<string>({
     queryKey: [`/api/spaces/${spaceId}/role`],
     enabled: !!spaceId,
   });
-  
+
   // Get permissions - this must be called at the top level, not conditionally
   const permissions = usePermissions(spaceId, roleData);
-  
+
   // Delete form mutation
   const deleteFormMutation = useMutation({
     mutationFn: async (formId: number) => {
@@ -115,10 +115,10 @@ export default function SpaceDetail() {
   }
 
   const { space, members = [], forms = [], userRole } = data as any;
-  
+
   // Check if form limit is reached (max 5 forms per space)
   const hasReachedFormLimit = forms.length >= 5;
-  
+
   // Debug: log the user role to verify it's being passed correctly
   console.log('Current user role:', userRole, 'Forms count:', forms.length, 'Limit reached:', hasReachedFormLimit);
 
@@ -134,16 +134,16 @@ export default function SpaceDetail() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return "Just now";
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays}d ago`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -218,8 +218,8 @@ export default function SpaceDetail() {
                 <Link href={`/spaces/${spaceId}/forms/new`}>
                   <Button className="w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">New Check-in ({forms.length}/5)</span>
-                    <span className="sm:hidden">New ({forms.length}/5)</span>
+                    <span className="hidden sm:inline">Form Builder ({forms.length}/5)</span>
+                    <span className="sm:hidden">Form Builder ({forms.length}/5)</span>
                   </Button>
                 </Link>
               )}
@@ -262,7 +262,7 @@ export default function SpaceDetail() {
               <p className="text-sm text-red-600">Maximum limit reached</p>
             )}
           </div>
-          
+
           {forms.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
