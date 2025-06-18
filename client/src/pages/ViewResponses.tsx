@@ -86,7 +86,7 @@ export default function ViewResponses() {
 
         {/* View Toggle */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">{(form as any).title} Responses</h1>
+          <h1 className="text-2xl font-bold text-gray-900">View Responses</h1>
 
         </div>
       </div>
