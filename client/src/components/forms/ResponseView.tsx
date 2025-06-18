@@ -81,14 +81,14 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Response Analytics</h2>
-          <p className="text-gray-600">{formTitle} • {formatTimeAgo(new Date().toISOString())}</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Response Analytics</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{formTitle} • {formatTimeAgo(new Date().toISOString())}</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
           <Select defaultValue="this-week">
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -98,7 +98,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
               <SelectItem value="all-time">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -106,27 +106,27 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl">
         <Card className="bg-gradient-to-br from-primary to-indigo-600 text-white">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold mb-1">{stats.totalResponses}</div>
-            <div className="text-primary-100 text-sm">Total Responses</div>
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold mb-2">{stats.totalResponses}</div>
+            <div className="text-primary-100 text-xs sm:text-sm">Total Responses</div>
           </CardContent>
         </Card>
         
         <Card className="bg-gradient-to-br from-secondary to-green-600 text-white">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold mb-1">{stats.completionRate}%</div>
-            <div className="text-green-100 text-sm">Response Rate</div>
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold mb-2">{stats.completionRate}%</div>
+            <div className="text-green-100 text-xs sm:text-sm">Response Rate</div>
           </CardContent>
         </Card>
         
         <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold mb-1">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold mb-2">
               {responses.length > 0 ? "2.5h" : "--"}
             </div>
-            <div className="text-purple-100 text-sm">Avg. Time</div>
+            <div className="text-purple-100 text-xs sm:text-sm">Avg. Time</div>
           </CardContent>
         </Card>
       </div>
