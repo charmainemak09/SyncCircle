@@ -99,30 +99,6 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
           <p className="text-sm sm:text-base text-gray-600 mt-1">{formTitle} • {formatTimeAgo(new Date().toISOString())}</p>
         </div>
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          <Select defaultValue="this-week">
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="this-week">This Week</SelectItem>
-              <SelectItem value="last-week">Last Week</SelectItem>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="all-time">All Time</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-            setItemsPerPage(Number(value));
-            setCurrentPage(1);
-          }}>
-            <SelectTrigger className="w-full sm:w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5 per page</SelectItem>
-              <SelectItem value="10">10 per page</SelectItem>
-              <SelectItem value="20">20 per page</SelectItem>
-            </SelectContent>
-          </Select>
           <Button className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export
@@ -158,14 +134,45 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
 
       {/* Individual Responses */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <h3 className="text-lg font-semibold text-gray-900">Individual Responses</h3>
           {responses.length > 0 && (
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
+              <Select defaultValue="this-week">
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="this-week">This Week</SelectItem>
+                  <SelectItem value="last-week">Last Week</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                  <SelectItem value="all-time">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}>
+                <SelectTrigger className="w-full sm:w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 per page</SelectItem>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="20">20 per page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+        
+        {responses.length > 0 && (
+          <div className="flex items-center justify-between border-b pb-4">
             <p className="text-sm text-gray-500">
               Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} responses
             </p>
-          )}
-        </div>
+          </div>
+        )}
         
         {responses.length === 0 ? (
           <Card>
