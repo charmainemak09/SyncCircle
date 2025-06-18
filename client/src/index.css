@@ -1,3 +1,7 @@
+` tags.
+
+```
+<replit_final_file>
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -235,8 +239,57 @@
 }
 
 .focus-ring {
-  @apply focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background focus:outline-none;
-}
+    @apply focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background focus:outline-none;
+  }
+
+  /* Enhanced focus indicators for better accessibility */
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    @apply ring-2 ring-primary ring-offset-2 outline-none;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .glass-effect,
+    .glass-card,
+    .glass-nav,
+    .glass-button,
+    .glass-input,
+    .glass-modal {
+      backdrop-filter: none;
+      background: hsl(var(--background));
+      border: 2px solid hsl(var(--border));
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Screen reader only text */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
 .text-gradient {
   background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));

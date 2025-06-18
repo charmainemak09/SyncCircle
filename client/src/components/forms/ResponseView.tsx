@@ -35,7 +35,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -52,13 +52,14 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         const maxRating = question.maxRating || 5;
         return (
           <div className="flex items-center space-x-2">
-            <div className="flex space-x-1">
+            <div className="flex space-x-1" role="img" aria-label={`Rating: ${rating} out of ${maxRating} stars`}>
               {Array.from({ length: maxRating }, (_, i) => (
                 <Star
                   key={i}
                   className={`w-4 h-4 ${
                     i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
                   }`}
+                  aria-hidden="true"
                 />
               ))}
             </div>
@@ -99,30 +100,6 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
           <p className="text-sm sm:text-base text-gray-600 mt-1">{formTitle} • {formatTimeAgo(new Date().toISOString())}</p>
         </div>
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          <Select defaultValue="this-week">
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="this-week">This Week</SelectItem>
-              <SelectItem value="last-week">Last Week</SelectItem>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="all-time">All Time</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-            setItemsPerPage(Number(value));
-            setCurrentPage(1);
-          }}>
-            <SelectTrigger className="w-full sm:w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5 per page</SelectItem>
-              <SelectItem value="10">10 per page</SelectItem>
-              <SelectItem value="20">20 per page</SelectItem>
-            </SelectContent>
-          </Select>
           <Button className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export
@@ -138,14 +115,14 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
             <div className="text-primary-100 text-xs sm:text-sm">Total Responses</div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-br from-secondary to-green-600 text-white">
           <CardContent className="p-4 sm:p-6">
             <div className="text-xl sm:text-2xl font-bold mb-2">{stats.completionRate}%</div>
             <div className="text-green-100 text-xs sm:text-sm">Response Rate</div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
           <CardContent className="p-4 sm:p-6">
             <div className="text-xl sm:text-2xl font-bold mb-2">
@@ -158,15 +135,46 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
 
       {/* Individual Responses */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <h3 className="text-lg font-semibold text-gray-900">Individual Responses</h3>
           {responses.length > 0 && (
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
+              <Select defaultValue="this-week">
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="this-week">This Week</SelectItem>
+                  <SelectItem value="last-week">Last Week</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                  <SelectItem value="all-time">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}>
+                <SelectTrigger className="w-full sm:w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 per page</SelectItem>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="20">20 per page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {responses.length > 0 && (
+          <div className="flex items-center justify-between border-b pb-4">
             <p className="text-sm text-gray-500">
               Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} responses
             </p>
-          )}
-        </div>
-        
+          </div>
+        )}
+
         {responses.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -234,7 +242,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                         className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       />
                     </PaginationItem>
-                    
+
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(page => {
                         // Show first page, last page, current page, and pages around current
@@ -256,7 +264,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                           </PaginationLink>
                         </PaginationItem>
                       ))}
-                    
+
                     <PaginationItem>
                       <PaginationNext 
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
