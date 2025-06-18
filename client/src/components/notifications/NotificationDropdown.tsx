@@ -74,10 +74,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     if (notification.formId) {
       if (notification.type === "form_reminder") {
         // Navigate to fill form page
-        setLocation(`/fill-form/${notification.formId}`);
+        setLocation(`/forms/${notification.formId}/fill`);
       } else if (notification.type === "new_response") {
         // Navigate to view responses page
-        setLocation(`/view-responses/${notification.formId}`);
+        setLocation(`/forms/${notification.formId}/responses`);
       }
     }
   };
