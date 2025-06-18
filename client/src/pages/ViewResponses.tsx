@@ -4,8 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ResponseView } from "@/components/forms/ResponseView";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Calendar, Users, Clock } from "lucide-react";
@@ -72,155 +70,6 @@ export default function ViewResponses() {
   const { responses, stats } = responseData as any;
   const questions = (form as any).questions as Question[];
 
-  const groupResponsesByPeriod = (responses: any[]) => {
-    // Group responses by submission date (check-in period)
-    const groups = responses.reduce((acc, response) => {
-      const submissionDate = new Date(response.submittedAt);
-      const dateKey = submissionDate.toDateString();
-      
-      if (!acc[dateKey]) {
-        acc[dateKey] = {
-          date: submissionDate,
-          responses: []
-        };
-      }
-      acc[dateKey].responses.push(response);
-      return acc;
-    }, {});
-
-    // Sort groups by date (newest first)
-    return Object.values(groups).sort((a: any, b: any) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  };
-
-  const renderGroupedView = () => {
-    const groupedData = groupResponsesByPeriod(responses);
-    
-    return (
-      <div className="space-y-8">
-        {groupedData.map((group: any, index) => (
-          <Card key={index} className="overflow-hidden">
-            {/* Newsletter-style header */}
-            <div className="bg-gradient-to-r from-primary/10 to-blue-50 border-b p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    {(form as any).title} - Check-in
-                  </h2>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {group.date.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-1" />
-                      {group.responses.length} response{group.responses.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Response content */}
-            <CardContent className="p-6">
-              <div className="space-y-8">
-                {group.responses.map((response: any, responseIndex: number) => (
-                  <div key={responseIndex}>
-                    {responseIndex > 0 && <Separator className="mb-8" />}
-                    <div className="border-l-4 border-primary/20 pl-6 py-2">
-                      {/* User header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={response.user.profileImageUrl} />
-                            <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
-                              {response.user.firstName?.[0]}{response.user.lastName?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold text-gray-900">
-                              {response.user.firstName} {response.user.lastName}
-                            </h4>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {new Date(response.submittedAt).toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                        {response.userId === (user as any)?.id && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                            Your Response
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* User's answers */}
-                      <div className="space-y-4">
-                        {questions.map((question: Question) => {
-                          const answer = response.answers[question.id];
-                          if (!answer) return null;
-                          
-                          return (
-                            <div key={question.id} className="bg-gray-50 rounded-lg p-4">
-                              <h5 className="font-medium text-gray-900 mb-2">{question.title}</h5>
-                              <div className="text-gray-700">
-                                {question.type === 'image' && answer ? (
-                                  <img 
-                                    src={answer} 
-                                    alt="Response" 
-                                    className="max-w-sm rounded-lg border" 
-                                  />
-                                ) : question.type === 'file' && answer ? (
-                                  <a 
-                                    href={answer} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center text-primary hover:underline"
-                                  >
-                                    📎 View attached file
-                                  </a>
-                                ) : question.type === 'rating' ? (
-                                  <div className="flex items-center space-x-1">
-                                    {Array.from({ length: question.maxRating || 5 }, (_, i) => (
-                                      <span key={i} className={i < answer ? "text-yellow-400" : "text-gray-300"}>
-                                        ⭐
-                                      </span>
-                                    ))}
-                                    <span className="ml-2 text-sm text-gray-600">({answer}/{question.maxRating || 5})</span>
-                                  </div>
-                                ) : Array.isArray(answer) ? (
-                                  <ul className="list-disc list-inside space-y-1">
-                                    {answer.map((item: string, i: number) => (
-                                      <li key={i}>{item}</li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p className="whitespace-pre-wrap">{answer}</p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -234,27 +83,16 @@ export default function ViewResponses() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Space
         </Button>
-        
+
         {/* View Toggle */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">{(form as any).title} Responses</h1>
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="group-toggle" className="text-sm font-medium">
-              Group by Check-in Period
-            </Label>
-            <Switch
-              id="group-toggle"
-              checked={groupByPeriod}
-              onCheckedChange={setGroupByPeriod}
-            />
-          </div>
+
         </div>
       </div>
 
       {/* Response View */}
-      {groupByPeriod ? (
-        renderGroupedView()
-      ) : (
+
         <ResponseView
           responses={responses}
           questions={questions}
@@ -262,7 +100,7 @@ export default function ViewResponses() {
           formTitle={(form as any).title}
           currentUserId={(user as any)?.id}
         />
-      )}
+
     </div>
   );
 }

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Download, Star, Clock } from "lucide-react";
 import { type Response, type User, type Question } from "@shared/schema";
 
@@ -19,6 +21,16 @@ interface ResponseViewProps {
 }
 
 export function ResponseView({ responses, questions, stats, formTitle, currentUserId }: ResponseViewProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Calculate pagination
+  const totalItems = responses.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentResponses = responses.slice(startIndex, endIndex);
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -98,6 +110,19 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
               <SelectItem value="all-time">All Time</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+            setItemsPerPage(Number(value));
+            setCurrentPage(1);
+          }}>
+            <SelectTrigger className="w-full sm:w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 per page</SelectItem>
+              <SelectItem value="10">10 per page</SelectItem>
+              <SelectItem value="20">20 per page</SelectItem>
+            </SelectContent>
+          </Select>
           <Button className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export
@@ -133,7 +158,14 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
 
       {/* Individual Responses */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900">Individual Responses</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Individual Responses</h3>
+          {responses.length > 0 && (
+            <p className="text-sm text-gray-500">
+              Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} responses
+            </p>
+          )}
+        </div>
         
         {responses.length === 0 ? (
           <Card>
@@ -145,50 +177,97 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
             </CardContent>
           </Card>
         ) : (
-          responses.map((response) => (
-            <Card key={response.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src={response.user.profileImageUrl || undefined} />
-                      <AvatarFallback>
-                        {response.user.firstName?.[0]}{response.user.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h4 className="font-medium text-gray-900">
-                        {response.user.firstName} {response.user.lastName}
-                      </h4>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="w-3 h-3 mr-1" />
-                        Submitted {formatTimeAgo(response.submittedAt.toString())}
+          <>
+            {currentResponses.map((response) => (
+              <Card key={response.id}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <Avatar>
+                        <AvatarImage src={response.user.profileImageUrl || undefined} />
+                        <AvatarFallback>
+                          {response.user.firstName?.[0]}{response.user.lastName?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {response.user.firstName} {response.user.lastName}
+                        </h4>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Submitted {formatTimeAgo(response.submittedAt.toString())}
+                        </div>
                       </div>
                     </div>
+                    {currentUserId === response.user.id && (
+                      <Button variant="outline" size="sm">
+                        Edit Response
+                      </Button>
+                    )}
                   </div>
-                  {currentUserId === response.user.id && (
-                    <Button variant="outline" size="sm">
-                      Edit Response
-                    </Button>
-                  )}
-                </div>
 
-                <div className="space-y-4">
-                  {questions.map((question) => {
-                    const answer = (response.answers as any)[question.id];
-                    return (
-                      <div key={question.id}>
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          {question.title}:
-                        </p>
-                        {renderAnswer(question, answer)}
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                  <div className="space-y-4">
+                    {questions.map((question) => {
+                      const answer = (response.answers as any)[question.id];
+                      return (
+                        <div key={question.id}>
+                          <p className="text-sm font-medium text-gray-700 mb-2">
+                            {question.title}:
+                          </p>
+                          {renderAnswer(question, answer)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => {
+                        // Show first page, last page, current page, and pages around current
+                        return page === 1 || 
+                               page === totalPages || 
+                               Math.abs(page - currentPage) <= 1;
+                      })
+                      .map((page, index, filteredPages) => (
+                        <PaginationItem key={page}>
+                          {index > 0 && filteredPages[index - 1] < page - 1 && (
+                            <span className="px-2 text-gray-400">...</span>
+                          )}
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
