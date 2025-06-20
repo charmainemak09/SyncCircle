@@ -651,9 +651,10 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           title: "Response submitted successfully",
           description: "Thank you for your check-in! You can submit another response anytime.",
         });
-        // Clear the form only for new responses
+        // Clear the form and draft for new responses
         setAnswers({});
         setLastSaved(null);
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       }
 
       onSubmit?.();
