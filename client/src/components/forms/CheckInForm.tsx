@@ -639,13 +639,23 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       if (editResponseId) {
         queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
       }
-      toast({
-        title: "Response submitted successfully",
-        description: "Thank you for your check-in! You can submit another response anytime.",
-      });
-      // Clear the form for a new response
-      setAnswers({});
-      setLastSaved(null);
+
+      if (editResponseId) {
+        toast({
+          title: "Response updated successfully",
+          description: "Your check-in response has been updated.",
+        });
+        // Keep form data for edits - don't clear
+      } else {
+        toast({
+          title: "Response submitted successfully",
+          description: "Thank you for your check-in! You can submit another response anytime.",
+        });
+        // Clear the form only for new responses
+        setAnswers({});
+        setLastSaved(null);
+      }
+
       onSubmit?.();
     },
     onError: (error: any) => {
