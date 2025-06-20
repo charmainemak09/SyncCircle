@@ -46,8 +46,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   const renderAnswer = (question: Question, answer: any) => {
     if (!answer && answer !== 0) {
       return (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <span className="text-gray-400 text-base font-normal italic">No response</span>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <span className="text-gray-400 text-sm font-normal italic">No response</span>
         </div>
       );
     }
@@ -57,20 +57,20 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         const rating = typeof answer === 'number' ? answer : parseInt(answer);
         const maxRating = question.maxRating || 5;
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center space-x-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
               <div className="flex space-x-1" role="img" aria-label={`Rating: ${rating} out of ${maxRating} stars`}>
                 {Array.from({ length: maxRating }, (_, i) => (
                   <Star
                     key={i}
-                    className={`w-5 h-5 ${
+                    className={`w-4 h-4 ${
                       i < rating ? "text-blue-500 fill-current" : "text-gray-300"
                     }`}
                     aria-hidden="true"
                   />
                 ))}
               </div>
-              <span className="text-blue-700 text-base font-medium">
+              <span className="text-blue-700 text-sm font-normal">
                 {rating} out of {maxRating}
               </span>
             </div>
@@ -79,8 +79,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       }
       case "multiple-choice":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-base font-medium px-3 py-1">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-sm font-normal px-2 py-1">
               {answer}
             </Badge>
           </div>
@@ -88,26 +88,26 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       case "text":
       case "textarea":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-blue-700 text-base font-normal leading-relaxed whitespace-pre-wrap">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-blue-700 text-sm font-normal leading-relaxed whitespace-pre-wrap">
               {answer}
             </p>
           </div>
         );
       case "image":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-sm">🖼️</span>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                <span className="text-blue-600 text-xs">🖼️</span>
               </div>
               <div>
-                <p className="text-blue-700 text-base font-medium">Image uploaded</p>
+                <p className="text-blue-700 text-sm font-normal">Image uploaded</p>
                 <a 
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline text-base font-normal"
+                  className="text-blue-600 hover:text-blue-800 underline text-sm font-normal"
                 >
                   View image
                 </a>
@@ -117,18 +117,18 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         );
       case "file":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-sm">📎</span>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                <span className="text-blue-600 text-xs">📎</span>
               </div>
               <div>
-                <p className="text-blue-700 text-base font-medium">File uploaded</p>
+                <p className="text-blue-700 text-sm font-normal">File uploaded</p>
                 <a 
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline text-base font-normal"
+                  className="text-blue-600 hover:text-blue-800 underline text-sm font-normal"
                 >
                   {answer.split('/').pop() || 'View file'}
                 </a>
@@ -138,8 +138,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         );
       default:
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <span className="text-blue-700 text-base font-normal">{answer}</span>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <span className="text-blue-700 text-sm font-normal">{answer}</span>
           </div>
         );
     }
