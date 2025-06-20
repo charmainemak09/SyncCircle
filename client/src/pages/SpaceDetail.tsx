@@ -80,6 +80,76 @@ export default function SpaceDetail() {
     },
   });
 
+  // Delete space mutation
+  const deleteSpaceMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/spaces/${spaceId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/spaces"] });
+      toast({
+        title: "Space deleted",
+        description: "The space has been successfully deleted.",
+      });
+      // Redirect to dashboard
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete space. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Leave space mutation
+  const leaveSpaceMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/spaces/${spaceId}/leave`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/spaces"] });
+      toast({
+        title: "Left space",
+        description: "You have successfully left the space.",
+      });
+      // Redirect to dashboard
+      window.location.href = "/";
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to leave space. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove member mutation
+  const removeMemberMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("DELETE", `/api/spaces/${spaceId}/members/${userId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
+      toast({
+        title: "Member removed",
+        description: "The member has been successfully removed from the space.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove member. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -225,10 +295,70 @@ export default function SpaceDetail() {
               )}
             </>
           )}
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {permissions.canDeleteSpace && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Space
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Space</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{space.name}"? This action cannot be undone and will permanently delete all forms, responses, and data associated with this space.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteSpaceMutation.mutate()}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete Space
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              {permissions.canLeaveSpace && !permissions.canDeleteSpace && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <UserPlus className="w-4 h-4 mr-2 rotate-180" />
+                      Leave Space
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Leave Space</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to leave "{space.name}"? You will no longer have access to this space and its content.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => leaveSpaceMutation.mutate()}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Leave Space
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -417,9 +547,37 @@ export default function SpaceDetail() {
                       <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">{member.user.username}</h4>
                       <p className="text-xs sm:text-sm text-gray-600 truncate">{member.user.email}</p>
                     </div>
-                    <Badge variant={member.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                      {member.role}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={member.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                        {member.role}
+                      </Badge>
+                      {permissions.canRemoveMembers && space.ownerId !== member.userId && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove Member</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove {member.user.username} from this space? They will lose access to all content in this space.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => removeMemberMutation.mutate(member.userId)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Remove Member
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

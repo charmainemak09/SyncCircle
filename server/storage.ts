@@ -8,7 +8,7 @@ import {
   type Notification, type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -56,6 +56,9 @@ export interface IStorage {
   markNotificationAsRead(id: number): Promise<boolean>;
   markAllNotificationsAsRead(userId: string): Promise<boolean>;
   getUnreadNotificationCount(userId: string): Promise<number>;
+
+  deleteSpace(spaceId: number): Promise<boolean>;
+  removeSpaceMember(spaceId: number, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -126,7 +129,7 @@ export class DatabaseStorage implements IStorage {
         .select({ count: count() })
         .from(spaceMembers)
         .where(eq(spaceMembers.spaceId, space.id));
-      
+
       result.push({
         ...space,
         memberCount: memberCountResult?.count || 0,
@@ -138,7 +141,7 @@ export class DatabaseStorage implements IStorage {
 
   async createSpace(space: InsertSpace & { inviteCode: string }): Promise<Space> {
     const [newSpace] = await db.insert(spaces).values(space).returning();
-    
+
     // Add the owner as an admin
     await db.insert(spaceMembers).values({
       spaceId: newSpace.id,
@@ -383,6 +386,40 @@ export class DatabaseStorage implements IStorage {
       .from(notifications)
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
     return result?.count || 0;
+  }
+
+  async deleteSpace(spaceId: number): Promise<boolean> {
+    try {
+      // Delete related records first (foreign key constraints)
+      await db.delete(notifications).where(eq(notifications.spaceId, spaceId));
+      await db.delete(responses).where(
+        inArray(responses.formId, 
+          db.select({ id: forms.id }).from(forms).where(eq(forms.spaceId, spaceId))
+        )
+      );
+      await db.delete(forms).where(eq(forms.spaceId, spaceId));
+      await db.delete(spaceMembers).where(eq(spaceMembers.spaceId, spaceId));
+      await db.delete(spaces).where(eq(spaces.id, spaceId));
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting space:", error);
+      return false;
+    }
+  }
+
+  async removeSpaceMember(spaceId: number, userId: string): Promise<boolean> {
+    try {
+      const result = await db
+        .delete(spaceMembers)
+        .where(and(eq(spaceMembers.spaceId, spaceId), eq(spaceMembers.userId, userId)))
+        .returning();
+
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error removing space member:", error);
+      return false;
+    }
   }
 }
 

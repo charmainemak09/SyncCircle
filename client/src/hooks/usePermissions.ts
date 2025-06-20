@@ -12,6 +12,9 @@ export interface UserPermissions {
   canEditOwnResponses: boolean;
   canEditAllResponses: boolean;
   canViewInviteCode: boolean;
+  canDeleteSpace: boolean;
+  canRemoveMembers: boolean;
+  canLeaveSpace: boolean;
 }
 
 export function usePermissions(spaceId?: number, userRole?: string): UserPermissions {
@@ -33,6 +36,9 @@ export function usePermissions(spaceId?: number, userRole?: string): UserPermiss
     canEditOwnResponses: true, // Both can edit their own responses
     canEditAllResponses: role === 'admin', // Only admins can edit any response
     canViewInviteCode: role === 'admin', // Only admins can view invite code
+    canDeleteSpace: role === 'admin', // Only admins can delete space
+    canRemoveMembers: role === 'admin', // Only admins can remove members
+    canLeaveSpace: true, // Both admin and participant can leave space
   };
 }
 

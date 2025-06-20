@@ -374,6 +374,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/spaces/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const spaceId = parseInt(req.params.id);
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
+      const userId = req.user.claims.sub;
+
+      const space = await storage.getSpace(spaceId);
+      if (!space) {
+        return res.status(404).json({ message: "Space not found" });
+      }
+
+      // Check if user is admin
+      const role = await storage.getSpaceMemberRole(spaceId, userId);
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete spaces" });
+      }
+
+      const deleted = await storage.deleteSpace(spaceId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete space" });
+      }
+
+      res.json({ message: "Space deleted successfully" });
+    } catch (error) {
+      console.error("Delete space error:", error);
+      res.status(500).json({ message: "Failed to delete space" });
+    }
+  });
+
+  app.post("/api/spaces/:id/leave", isAuthenticated, async (req: any, res) => {
+    try {
+      const spaceId = parseInt(req.params.id);
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
+      const userId = req.user.claims.sub;
+
+      const space = await storage.getSpace(spaceId);
+      if (!space) {
+        return res.status(404).json({ message: "Space not found" });
+      }
+
+      // Check if user is member
+      const role = await storage.getSpaceMemberRole(spaceId, userId);
+      if (!role) {
+        return res.status(404).json({ message: "Not a member of this space" });
+      }
+
+      // Don't allow space owner to leave if they're the only admin
+      if (space.ownerId === userId) {
+        const members = await storage.getSpaceMembers(spaceId);
+        const adminCount = members.filter(member => member.role === "admin").length;
+        if (adminCount === 1) {
+          return res.status(400).json({ message: "Space owner cannot leave when they are the only admin. Transfer ownership or delete the space instead." });
+        }
+      }
+
+      const removed = await storage.removeSpaceMember(spaceId, userId);
+      if (!removed) {
+        return res.status(500).json({ message: "Failed to leave space" });
+      }
+
+      res.json({ message: "Successfully left space" });
+    } catch (error) {
+      console.error("Leave space error:", error);
+      res.status(500).json({ message: "Failed to leave space" });
+    }
+  });
+
+  app.delete("/api/spaces/:id/members/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      const spaceId = parseInt(req.params.id);
+      const targetUserId = req.params.userId;
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
+      const adminUserId = req.user.claims.sub;
+
+      const space = await storage.getSpace(spaceId);
+      if (!space) {
+        return res.status(404).json({ message: "Space not found" });
+      }
+
+      // Check if user is admin
+      const adminRole = await storage.getSpaceMemberRole(spaceId, adminUserId);
+      if (adminRole !== "admin") {
+        return res.status(403).json({ message: "Only admins can remove members" });
+      }
+
+      // Check if target user is member
+      const targetRole = await storage.getSpaceMemberRole(spaceId, targetUserId);
+      if (!targetRole) {
+        return res.status(404).json({ message: "Target user is not a member of this space" });
+      }
+
+      // Don't allow removing space owner
+      if (space.ownerId === targetUserId) {
+        return res.status(400).json({ message: "Cannot remove space owner" });
+      }
+
+      const removed = await storage.removeSpaceMember(spaceId, targetUserId);
+      if (!removed) {
+        return res.status(500).json({ message: "Failed to remove member" });
+      }
+
+      res.json({ message: "Member removed successfully" });
+    } catch (error) {
+      console.error("Remove member error:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
   // Form routes
   app.post("/api/forms", isAuthenticated, async (req: any, res) => {
     try {
