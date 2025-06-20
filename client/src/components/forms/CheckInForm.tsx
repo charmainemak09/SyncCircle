@@ -590,17 +590,28 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
   const queryClient = useQueryClient();
     const [, setLocation] = useLocation();
 
-  // Load existing response
-  const { data: existingResponse } = useQuery({
+  // Load existing response for editing
+  const { data: editResponse } = useQuery({
+    queryKey: [`/api/responses/${editResponseId}`],
+    enabled: !!editResponseId,
+  });
+
+  // Load draft response for new submissions
+  const { data: draftResponse } = useQuery({
     queryKey: [`/api/forms/${form.id}/my-response`],
+    enabled: !editResponseId,
   });
 
   // Load existing answers
   useEffect(() => {
-    if (existingResponse && typeof existingResponse === 'object' && 'answers' in existingResponse && existingResponse.answers) {
-      setAnswers(existingResponse.answers as Record<string, any>);
+    if (editResponseId && editResponse && typeof editResponse === 'object' && 'answers' in editResponse && editResponse.answers) {
+      // Load data from the specific response being edited
+      setAnswers(editResponse.answers as Record<string, any>);
+    } else if (!editResponseId && draftResponse && typeof draftResponse === 'object' && 'answers' in draftResponse && draftResponse.answers) {
+      // Load draft data for new submissions
+      setAnswers(draftResponse.answers as Record<string, any>);
     }
-  }, [existingResponse]);
+  }, [editResponse, draftResponse, editResponseId]);
 
   // Auto-save mutation
   const autoSaveMutation = useMutation({
@@ -656,6 +667,10 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       setAnswers({});
       setLastSaved(null);
       queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      
+      if (editResponseId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+      }
 
       onSubmit?.();
     },
@@ -668,16 +683,16 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
     },
   });
 
-  // Auto-save when answers change
+  // Auto-save when answers change (only for new responses, not edits)
   useEffect(() => {
-    if (Object.keys(answers).length > 0) {
+    if (!editResponseId && Object.keys(answers).length > 0) {
       const timeoutId = setTimeout(() => {
         autoSaveMutation.mutate(answers);
       }, 2000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [answers]);
+  }, [answers, editResponseId]);
 
   const updateAnswer = (questionId: string, value: any) => {
     console.log("Updating answer for question:", questionId, "with value:", value);
@@ -836,19 +851,21 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       </div>
 
       {/* Auto-save indicator */}
-      <Card className="bg-gray-50">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center space-x-2">
-              <Save className="w-4 h-4 text-secondary" />
-              <span>All changes saved automatically</span>
+      {!editResponseId && (
+        <Card className="bg-gray-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <Save className="w-4 h-4 text-secondary" />
+                <span>All changes saved automatically</span>
+              </div>
+              <span className="text-xs text-gray-500">
+                Last saved: {formatLastSaved()}
+              </span>
             </div>
-            <span className="text-xs text-gray-500">
-              Last saved: {formatLastSaved()}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Form Actions */}
       <div className="flex items-center justify-between pt-6">
