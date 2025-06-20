@@ -74,9 +74,9 @@ function Router() {
                 </div>
               </div>
               <h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-900 sm:text-7xl">
-                Team sync made{' '}
+                SyncCircle makes meaningful connection{' '}
                 <span className="relative whitespace-nowrap text-blue-600">
-                  <span className="relative">simple</span>
+                  <span className="relative">simple, intentional, and sustainable</span>
                 </span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700">
