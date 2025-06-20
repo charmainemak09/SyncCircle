@@ -12,7 +12,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl">Welcome to SyncCircle</CardTitle>
           <CardDescription>
-            Sign in to manage your team collaboration spaces and check-ins
+            SyncCircle makes meaningful connection simple, intentional, and sustainable.
           </CardDescription>
         </CardHeader>
         <CardContent>
