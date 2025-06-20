@@ -807,6 +807,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get specific response by ID (for editing)
+  app.get("/api/responses/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const responseId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const response = await storage.getResponse(responseId);
+      if (!response) {
+        return res.status(404).json({ message: "Response not found" });
+      }
+
+      const form = await storage.getForm(response.formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      const role = await storage.getSpaceMemberRole(form.spaceId, userId);
+      if (!role) {
+        return res.status(403).json({ message: "Not a member of this space" });
+      }
+
+      // Check permissions: user can view their own response, or admin can view any response
+      const canView = response.userId === userId || role === "admin";
+      if (!canView) {
+        return res.status(403).json({ message: "You can only view your own responses" });
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error("Get response error:", error);
+      res.status(500).json({ message: "Failed to get response" });
+    }
+  });
+
   // Update response with permission checks
   app.put("/api/responses/:id", isAuthenticated, async (req: any, res) => {
     try {

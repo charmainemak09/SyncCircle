@@ -1,13 +1,19 @@
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { CheckInForm } from "@/components/forms/CheckInForm";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function FillForm() {
   const { formId } = useParams();
-  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const [location, setLocation] = useLocation();
+
+  // Extract edit parameter from URL
+  const searchParams = new URLSearchParams(location.split('?')[1]);
+  const editResponseId = searchParams.get('edit');
 
   const { data: form, isLoading, error } = useQuery({
     queryKey: [`/api/forms/${formId}`],
@@ -65,7 +71,7 @@ export default function FillForm() {
       </div>
 
       {/* Form */}
-      <CheckInForm form={form} onSubmit={handleSubmitComplete} />
+      <CheckInForm form={form} editResponseId={editResponseId || undefined} />
     </div>
   );
 }

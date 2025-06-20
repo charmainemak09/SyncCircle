@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Download, Star, Clock } from "lucide-react";
+import { Download, Star, Clock, Edit } from "lucide-react";
 import { type Response, type User, type Question } from "@shared/schema";
 
 interface ResponseViewProps {
@@ -23,6 +24,7 @@ interface ResponseViewProps {
 export function ResponseView({ responses, questions, stats, formTitle, currentUserId }: ResponseViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [, setLocation] = useLocation();
 
   // Calculate pagination
   const totalItems = responses.length;
@@ -41,6 +43,11 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays}d ago`;
     return date.toLocaleDateString();
+  };
+
+  const handleEditResponse = (response: Response & { user: User }) => {
+    // Navigate to the form with the response data for editing
+    setLocation(`/forms/${response.formId}/fill?edit=${response.id}`);
   };
 
   const renderAnswer = (question: Question, answer: any) => {
@@ -265,8 +272,14 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                       </div>
                     </div>
                     {currentUserId === response.user.id && (
-                      <Button variant="outline" size="sm">
-                        Edit Response
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditResponse(response)}
+                        className="flex items-center space-x-2"
+                      >
+                        <Edit className="w-3 h-3" />
+                        <span>Edit Response</span>
                       </Button>
                     )}
                   </div>

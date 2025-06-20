@@ -12,10 +12,12 @@ import { type Form, type Question, type Answer } from "@shared/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface CheckInFormProps {
   form: Form;
   onSubmit?: () => void;
+  editResponseId?: string;
 }
 
 interface ImageUploadFieldProps {
@@ -44,10 +46,10 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
       const formData = new FormData();
       formData.append("image", file);
       console.log("FormData created:", formData.get("image"));
-      
+
       setIsUploading(true);
       setUploadProgress(0);
-      
+
       // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -58,7 +60,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
           return prev + 10;
         });
       }, 100);
-      
+
       try {
         const response = await apiRequest("POST", "/api/upload/form-image", formData);
         const data = await response.json();
@@ -165,7 +167,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
               className="max-w-full max-h-48 rounded-lg object-contain border mx-auto"
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FileImage className="w-8 h-8 text-blue-500" />
@@ -222,7 +224,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
         >
           <div className="flex flex-col items-center space-y-2">
             <FileImage className="w-12 h-12 text-gray-400" />
-            
+
             <div>
               <p className="text-gray-600 mb-1">
                 {isDragOver 
@@ -233,7 +235,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
               <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
             </div>
           </div>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -276,10 +278,10 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
-      
+
       setIsUploading(true);
       setUploadProgress(0);
-      
+
       // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -290,7 +292,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
           return prev + 10;
         });
       }, 100);
-      
+
       try {
         const response = await apiRequest("POST", "/api/upload/form-file", formData);
         const data = await response.json();
@@ -350,7 +352,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
     }
 
     setSelectedFile(file);
-    
+
     // Create preview URL for images
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
@@ -359,7 +361,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
       };
       reader.readAsDataURL(file);
     }
-    
+
     return true;
   };
 
@@ -441,7 +443,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
               />
             </div>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {getFileIcon(currentValue)}
@@ -518,7 +520,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
             ) : (
               <File className="w-12 h-12 text-gray-400" />
             )}
-            
+
             <div>
               <p className="text-gray-600 mb-1">
                 {isDragOver 
@@ -531,7 +533,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
               <p className="text-sm text-gray-500">JPEG, PNG, PDF up to 10MB</p>
             </div>
           </div>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -581,11 +583,12 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
   );
 }
 
-export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
+export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps) {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+    const [, setLocation] = useLocation();
 
   // Load existing response
   const { data: existingResponse } = useQuery({
@@ -614,17 +617,32 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
 
   // Submit mutation
   const submitMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/responses", {
-      formId: form.id,
-      answers: data,
-      isDraft: false,
-    }),
+    mutationFn: (data: any) => {
+      if (editResponseId) {
+        // Update existing response
+        return apiRequest("PUT", `/api/responses/${editResponseId}`, {
+          answers: data,
+          isDraft: false,
+        });
+      } else {
+        // Create new response
+        return apiRequest("POST", "/api/responses", {
+          formId: form.id,
+          answers: data,
+          isDraft: false,
+        });
+      }
+    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/responses`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      if (editResponseId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+      }
       toast({
         title: "Response submitted successfully",
         description: "Thank you for your check-in! You can submit another response anytime.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       // Clear the form for a new response
       setAnswers({});
       setLastSaved(null);
@@ -676,6 +694,9 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
     }
 
     submitMutation.mutate(answers);
+       if (editResponseId) {
+        setLocation(`/forms/${form.id}/responses`);
+      }
   };
 
   const questions = form.questions as Question[];
@@ -684,7 +705,7 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
     if (!lastSaved) return "Never";
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - lastSaved.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return "Just now";
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -827,7 +848,7 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
         >
           Save as Draft
         </Button>
-        
+
         <div className="flex space-x-4">
           <Button
             onClick={handleSubmit}
