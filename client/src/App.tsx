@@ -79,9 +79,7 @@ function Router() {
                   <span className="relative">simple, intentional, and sustainable</span>
                 </span>
               </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700">
-                Create custom forms, collect team updates, and keep everyone aligned with recurring check-ins and automated newsletters.
-              </p>
+              
               <div className="mt-10 flex justify-center gap-x-6">
                 <Button 
                   onClick={() => window.location.href = '/api/login'}
