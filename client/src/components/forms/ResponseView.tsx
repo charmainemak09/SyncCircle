@@ -44,9 +44,9 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   };
 
   const renderAnswer = (question: Question, answer: any) => {
-    const containerClass = "bg-blue-50 border border-blue-200 rounded-lg p-4";
-    const textClass = "text-blue-700 text-sm font-normal leading-relaxed";
-    
+    const containerClass = "bg-gray-50 border border-gray-200 rounded-lg p-4";
+    const textClass = "text-gray-700 text-sm font-normal leading-relaxed";
+
     if (!answer && answer !== 0) {
       return (
         <div className={containerClass}>
@@ -101,8 +101,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         return (
           <div className={containerClass}>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 text-xs">🖼️</span>
+              <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-gray-600 text-xs">🖼️</span>
               </div>
               <div className="flex-1">
                 <p className={textClass}>Image uploaded</p>
@@ -110,7 +110,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className={`${textClass} text-blue-600 hover:text-blue-800 underline`}
+                  className={`${textClass} text-gray-600 hover:text-gray-800 underline`}
                 >
                   View image
                 </a>
@@ -122,8 +122,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         return (
           <div className={containerClass}>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 text-xs">📎</span>
+              <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-gray-600 text-xs">📎</span>
               </div>
               <div className="flex-1">
                 <p className={textClass}>File uploaded</p>
@@ -131,7 +131,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className={`${textClass} text-blue-600 hover:text-blue-800 underline`}
+                  className={`${textClass} text-gray-600 hover:text-gray-800 underline`}
                 >
                   {answer.split('/').pop() || 'View file'}
                 </a>
