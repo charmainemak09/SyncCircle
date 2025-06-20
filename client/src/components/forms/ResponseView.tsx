@@ -44,9 +44,12 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   };
 
   const renderAnswer = (question: Question, answer: any) => {
+    const containerClass = "bg-blue-50 border border-blue-200 rounded-lg p-4";
+    const textClass = "text-blue-700 text-sm font-normal leading-relaxed";
+    
     if (!answer && answer !== 0) {
       return (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className={containerClass}>
           <span className="text-gray-400 text-sm font-normal italic">No response</span>
         </div>
       );
@@ -57,8 +60,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         const rating = typeof answer === 'number' ? answer : parseInt(answer);
         const maxRating = question.maxRating || 5;
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
+          <div className={containerClass}>
+            <div className="flex items-center space-x-3">
               <div className="flex space-x-1" role="img" aria-label={`Rating: ${rating} out of ${maxRating} stars`}>
                 {Array.from({ length: maxRating }, (_, i) => (
                   <Star
@@ -70,7 +73,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                   />
                 ))}
               </div>
-              <span className="text-blue-700 text-sm font-normal">
+              <span className={textClass}>
                 {rating} out of {maxRating}
               </span>
             </div>
@@ -79,35 +82,35 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       }
       case "multiple-choice":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-sm font-normal px-2 py-1">
+          <div className={containerClass}>
+            <span className={textClass}>
               {answer}
-            </Badge>
+            </span>
           </div>
         );
       case "text":
       case "textarea":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-blue-700 text-sm font-normal leading-relaxed whitespace-pre-wrap">
+          <div className={containerClass}>
+            <p className={`${textClass} whitespace-pre-wrap`}>
               {answer}
             </p>
           </div>
         );
       case "image":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+          <div className={containerClass}>
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-600 text-xs">🖼️</span>
               </div>
-              <div>
-                <p className="text-blue-700 text-sm font-normal">Image uploaded</p>
+              <div className="flex-1">
+                <p className={textClass}>Image uploaded</p>
                 <a 
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline text-sm font-normal"
+                  className={`${textClass} text-blue-600 hover:text-blue-800 underline`}
                 >
                   View image
                 </a>
@@ -117,18 +120,18 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         );
       case "file":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+          <div className={containerClass}>
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-600 text-xs">📎</span>
               </div>
-              <div>
-                <p className="text-blue-700 text-sm font-normal">File uploaded</p>
+              <div className="flex-1">
+                <p className={textClass}>File uploaded</p>
                 <a 
                   href={answer} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline text-sm font-normal"
+                  className={`${textClass} text-blue-600 hover:text-blue-800 underline`}
                 >
                   {answer.split('/').pop() || 'View file'}
                 </a>
@@ -138,8 +141,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         );
       default:
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <span className="text-blue-700 text-sm font-normal">{answer}</span>
+          <div className={containerClass}>
+            <span className={textClass}>{answer}</span>
           </div>
         );
     }
