@@ -340,18 +340,26 @@ export default function SpaceDetail() {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Leave Space</AlertDialogTitle>
+                      <AlertDialogTitle>Confirm Leave Space</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to leave "{space.name}"? You will no longer have access to this space and its content.
+                        Are you sure you want to leave "{space.name}"? 
+                        <br /><br />
+                        <strong>This action cannot be undone.</strong> You will:
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                          <li>Lose access to all forms and responses in this space</li>
+                          <li>No longer receive notifications from this space</li>
+                          <li>Need a new invite to rejoin this space</li>
+                        </ul>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => leaveSpaceMutation.mutate()}
-                        className="bg-red-600 hover:bg-red-700"
+                        className="bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                        disabled={leaveSpaceMutation.isPending}
                       >
-                        Leave Space
+                        {leaveSpaceMutation.isPending ? "Leaving..." : "Yes, Leave Space"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
