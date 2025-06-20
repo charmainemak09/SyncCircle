@@ -415,7 +415,7 @@ export class DatabaseStorage implements IStorage {
         .where(and(eq(spaceMembers.spaceId, spaceId), eq(spaceMembers.userId, userId)))
         .returning();
 
-      return result.rowCount > 0;
+      return result.length > 0;
     } catch (error) {
       console.error("Error removing space member:", error);
       return false;
