@@ -388,6 +388,20 @@ export class DatabaseStorage implements IStorage {
     return result?.count || 0;
   }
 
+  async updateSpace(spaceId: number, updates: { name?: string; description?: string }): Promise<any> {
+    try {
+      const result = await db
+        .update(spaces)
+        .set(updates)
+        .where(eq(spaces.id, spaceId))
+        .returning();
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error updating space:", error);
+      return null;
+    }
+  }
+
   async deleteSpace(spaceId: number): Promise<boolean> {
     try {
       // Delete related records first (foreign key constraints)

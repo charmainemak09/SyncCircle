@@ -374,6 +374,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/spaces/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const spaceId = parseInt(req.params.id);
+      if (isNaN(spaceId)) {
+        return res.status(400).json({ message: "Invalid space ID" });
+      }
+      const userId = req.user.claims.sub;
+      const { name, description } = req.body;
+
+      if (!name || !name.trim()) {
+        return res.status(400).json({ message: "Space name is required" });
+      }
+
+      const space = await storage.getSpace(spaceId);
+      if (!space) {
+        return res.status(404).json({ message: "Space not found" });
+      }
+
+      // Check if user is admin
+      const role = await storage.getSpaceMemberRole(spaceId, userId);
+      if (role !== "admin") {
+        return res.status(403).json({ message: "Only admins can edit spaces" });
+      }
+
+      const updatedSpace = await storage.updateSpace(spaceId, {
+        name: name.trim(),
+        description: description?.trim() || space.description,
+      });
+
+      if (!updatedSpace) {
+        return res.status(500).json({ message: "Failed to update space" });
+      }
+
+      res.json(updatedSpace);
+    } catch (error) {
+      console.error("Update space error:", error);
+      res.status(500).json({ message: "Failed to update space" });
+    }
+  });
+
   app.delete("/api/spaces/:id", isAuthenticated, async (req: any, res) => {
     try {
       const spaceId = parseInt(req.params.id);

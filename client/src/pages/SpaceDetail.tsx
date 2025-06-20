@@ -9,7 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy, MoreVertical, Trash2, EyeOff, Eye, Send } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Settings, Plus, Users, BarChart3, ClipboardCheck, Calendar, Clock, UserPlus, Copy, MoreVertical, Trash2, EyeOff, Eye, Send, Edit } from "lucide-react";
 import { type Form } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +21,9 @@ export default function SpaceDetail() {
   const { id } = useParams();
   const spaceId = parseInt(id!);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const { toast } = useToast();
 
   const { data, isLoading } = useQuery({
@@ -150,6 +155,30 @@ export default function SpaceDetail() {
     },
   });
 
+  // Edit space mutation
+  const editSpaceMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string }) => {
+      const response = await apiRequest("PUT", `/api/spaces/${spaceId}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/spaces/${spaceId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/spaces"] });
+      toast({
+        title: "Space updated",
+        description: "The space has been successfully updated.",
+      });
+      setShowEditDialog(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update space. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -197,6 +226,27 @@ export default function SpaceDetail() {
     toast({
       title: "Invite code copied!",
       description: "Share this code with team members to invite them.",
+    });
+  };
+
+  const openEditDialog = () => {
+    setEditName(space.name);
+    setEditDescription(space.description || "");
+    setShowEditDialog(true);
+  };
+
+  const handleEditSubmit = () => {
+    if (!editName.trim()) {
+      toast({
+        title: "Error",
+        description: "Space name cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    editSpaceMutation.mutate({
+      name: editName.trim(),
+      description: editDescription.trim(),
     });
   };
 
@@ -303,6 +353,12 @@ export default function SpaceDetail() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {permissions.canDeleteSpace && (
+                <DropdownMenuItem onClick={openEditDialog}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Space
+                </DropdownMenuItem>
+              )}
               {permissions.canDeleteSpace && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -605,6 +661,49 @@ export default function SpaceDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Space Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Space</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Space Name</label>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Enter space name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (Optional)</label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Describe the purpose of this space..."
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+                disabled={editSpaceMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditSubmit}
+                disabled={editSpaceMutation.isPending || !editName.trim()}
+              >
+                {editSpaceMutation.isPending ? "Updating..." : "Update Space"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
