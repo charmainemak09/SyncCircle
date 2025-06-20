@@ -720,20 +720,32 @@ export function CheckInForm({ form, onSubmit }: CheckInFormProps) {
               </div>
 
               {question.type === "text" && (
-                <Input
-                  value={answers[question.id] || ""}
-                  onChange={(e) => updateAnswer(question.id, e.target.value)}
-                  placeholder="Enter your answer..."
-                />
+                <div className="space-y-2">
+                  <Input
+                    value={answers[question.id] || ""}
+                    onChange={(e) => updateAnswer(question.id, e.target.value)}
+                    placeholder="Enter your answer..."
+                    maxLength={500}
+                  />
+                  <div className="text-xs text-gray-500 text-right">
+                    {(answers[question.id] || "").length}/500 characters
+                  </div>
+                </div>
               )}
 
               {question.type === "textarea" && (
-                <Textarea
-                  value={answers[question.id] || ""}
-                  onChange={(e) => updateAnswer(question.id, e.target.value)}
-                  placeholder="Share your thoughts..."
-                  rows={4}
-                />
+                <div className="space-y-2">
+                  <Textarea
+                    value={answers[question.id] || ""}
+                    onChange={(e) => updateAnswer(question.id, e.target.value)}
+                    placeholder="Share your thoughts..."
+                    rows={4}
+                    maxLength={2000}
+                  />
+                  <div className="text-xs text-gray-500 text-right">
+                    {(answers[question.id] || "").length}/2000 characters
+                  </div>
+                </div>
               )}
 
               {question.type === "multiple-choice" && question.options && (

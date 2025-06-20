@@ -135,6 +135,7 @@ export function FormBuilder({
                 value={title}
                 onChange={(e) => onTitleChange(e.target.value)}
                 placeholder="Enter form title..."
+                maxLength={100}
               />
             </CardContent>
           </Card>
@@ -176,6 +177,7 @@ export function FormBuilder({
                     value={question.title}
                     onChange={(e) => updateQuestion(question.id, { title: e.target.value })}
                     placeholder="Enter your question..."
+                    maxLength={200}
                   />
 
                   {editingQuestion === question.id && (
@@ -206,6 +208,7 @@ export function FormBuilder({
                               <Input
                                 value={option}
                                 onChange={(e) => updateOption(question.id, optionIndex, e.target.value)}
+                                maxLength={100}
                               />
                               {question.options!.length > 2 && (
                                 <Button
