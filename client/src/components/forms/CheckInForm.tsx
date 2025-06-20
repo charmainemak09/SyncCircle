@@ -628,7 +628,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
   // Submit mutation
   const submitMutation = useMutation({
-    mutationFn: (data: any) => {
+    mutationFn: async (data: any) => {
       if (editResponseId) {
         // Update existing response
         return apiRequest("PUT", `/api/responses/${editResponseId}`, {
@@ -636,12 +636,26 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           isDraft: false,
         });
       } else {
-        // Create new response
-        return apiRequest("POST", "/api/responses", {
+        // Create new response and clear any existing draft
+        const response = await apiRequest("POST", "/api/responses", {
           formId: form.id,
           answers: data,
           isDraft: false,
         });
+        
+        // Clear the draft from server by submitting empty answers
+        try {
+          await apiRequest("POST", "/api/responses", {
+            formId: form.id,
+            answers: {},
+            isDraft: true,
+          });
+        } catch (error) {
+          // Ignore errors when clearing draft
+          console.log("Failed to clear draft:", error);
+        }
+        
+        return response;
       }
     },
     onSuccess: () => {
@@ -666,9 +680,13 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       // Clear the form and draft for all submissions (both new and edits)
       setAnswers({});
       setLastSaved(null);
+      
+      // Remove cached data and invalidate queries
+      queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       
       if (editResponseId) {
+        queryClient.removeQueries({ queryKey: [`/api/responses/${editResponseId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
       }
 
