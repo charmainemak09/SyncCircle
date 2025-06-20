@@ -73,9 +73,9 @@ function Router() {
                   SC
                 </div>
               </div>
-              <h1 className="mx-auto max-w-4xl font-display text-3xl font-medium tracking-tight text-slate-900 sm:text-5xl">
+              <h1 className="mx-auto max-w-4xl font-display text-2xl font-medium tracking-tight text-slate-900 sm:text-3xl lg:text-5xl px-4 sm:px-0">
                 SyncCircle makes meaningful connection{' '}
-                <span className="relative whitespace-nowrap text-blue-600">
+                <span className="relative text-blue-600 block sm:inline">
                   <span className="relative">simple, intentional, and sustainable</span>
                 </span>
               </h1>

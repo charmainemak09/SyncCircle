@@ -397,15 +397,18 @@ export default function SpaceDetail() {
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Confirm Leave Space</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to leave "{space.name}"? 
-                        <br /><br />
-                        <strong>This action cannot be undone.</strong> You will:
-                        <ul className="list-disc list-inside mt-2 space-y-1">
-                          <li>Lose access to all forms and responses in this space</li>
-                          <li>No longer receive notifications from this space</li>
-                          <li>Need a new invite to rejoin this space</li>
-                        </ul>
+                      <AlertDialogDescription asChild>
+                        <div>
+                          <p>Are you sure you want to leave "{space.name}"?</p>
+                          <p className="mt-2">
+                            <strong>This action cannot be undone.</strong> You will:
+                          </p>
+                          <ul className="list-disc list-inside mt-2 space-y-1">
+                            <li>Lose access to all forms and responses in this space</li>
+                            <li>No longer receive notifications from this space</li>
+                            <li>Need a new invite to rejoin this space</li>
+                          </ul>
+                        </div>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
