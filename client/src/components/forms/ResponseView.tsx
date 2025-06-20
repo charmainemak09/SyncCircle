@@ -44,104 +44,50 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   };
 
   const renderAnswer = (question: Question, answer: any) => {
-    if (!answer && answer !== 0) {
-      return (
-        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-          <span className="text-gray-400 italic">No response</span>
-        </div>
-      );
-    }
+    if (!answer) return <span className="text-gray-400">No answer</span>;
 
     switch (question.type) {
       case "rating": {
         const rating = typeof answer === 'number' ? answer : parseInt(answer);
         const maxRating = question.maxRating || 5;
         return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="flex space-x-1" role="img" aria-label={`Rating: ${rating} out of ${maxRating} stars`}>
-                {Array.from({ length: maxRating }, (_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                    }`}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-medium text-gray-700">
-                {rating} out of {maxRating}
-              </span>
+          <div className="flex items-center space-x-2">
+            <div className="flex space-x-1" role="img" aria-label={`Rating: ${rating} out of ${maxRating} stars`}>
+              {Array.from({ length: maxRating }, (_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${
+                    i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
+                  }`}
+                  aria-hidden="true"
+                />
+              ))}
             </div>
+            <span className="text-sm text-gray-600">({rating}/{maxRating})</span>
           </div>
         );
       }
       case "multiple-choice":
         return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <Badge variant="secondary" className="bg-primary/10 text-primary font-medium">
-              {answer}
-            </Badge>
-          </div>
+          <Badge variant="secondary" className="bg-primary/10 text-primary">
+            {answer}
+          </Badge>
         );
       case "text":
       case "textarea":
         return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {answer}
-            </p>
-          </div>
+          <p className="text-gray-600 bg-gray-50 rounded-lg p-3">
+            {answer}
+          </p>
         );
       case "image":
         return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-sm">🖼️</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700">Image uploaded</p>
-                <a 
-                  href={answer} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                >
-                  View image
-                </a>
-              </div>
-            </div>
-          </div>
-        );
-      case "file":
-        return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                <span className="text-gray-600 text-sm">📎</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700">File uploaded</p>
-                <a 
-                  href={answer} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                >
-                  {answer.split('/').pop() || 'View file'}
-                </a>
-              </div>
-            </div>
+          <div className="text-sm text-blue-600">
+            📎 {answer}
           </div>
         );
       default:
-        return (
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <span className="text-gray-700">{answer}</span>
-          </div>
-        );
+        return <span>{answer}</span>;
     }
   };
 
