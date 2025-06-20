@@ -645,17 +645,17 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           title: "Response updated successfully",
           description: "Your check-in response has been updated.",
         });
-        // Keep form data for edits - don't clear
       } else {
         toast({
           title: "Response submitted successfully",
           description: "Thank you for your check-in! You can submit another response anytime.",
         });
-        // Clear the form and draft for new responses
-        setAnswers({});
-        setLastSaved(null);
-        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       }
+      
+      // Clear the form and draft for all submissions (both new and edits)
+      setAnswers({});
+      setLastSaved(null);
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
 
       onSubmit?.();
     },
