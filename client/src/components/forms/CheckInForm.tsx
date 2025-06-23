@@ -894,10 +894,28 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                         ))}
                       </div>
                     </div>
-                    {answers[question.id] && (
+                    {answers[question.id] ? (
+                      <div className="flex items-center justify-between mt-3 sm:mt-2">
+                        <div className="text-center flex-1">
+                          <span className="text-xs sm:text-sm text-gray-600 font-medium">
+                            {answers[question.id]} out of {question.maxRating || 10} selected
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateAnswer(question.id, undefined)}
+                          className="text-xs text-gray-500 hover:text-gray-700 p-1 h-auto"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Clear
+                        </Button>
+                      </div>
+                    ) : (
                       <div className="text-center mt-3 sm:mt-2">
-                        <span className="text-xs sm:text-sm text-gray-600 font-medium">
-                          {answers[question.id]} out of {question.maxRating || 10} selected
+                        <span className="text-xs sm:text-sm text-gray-500">
+                          No rating selected
                         </span>
                       </div>
                     )}
