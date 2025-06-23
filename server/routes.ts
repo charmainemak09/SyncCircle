@@ -19,6 +19,12 @@ async function createFormReminderNotifications(formId: number): Promise<void> {
     const form = await storage.getForm(formId);
     if (!form || !form.isActive) return;
 
+    // Skip notifications for Community Feedback space's Platform Feedback form
+    const space = await storage.getSpace(form.spaceId);
+    if (space && space.name === "Community Feedback" && form.title === "Platform Feedback") {
+      return;
+    }
+
     const spaceMembers = await storage.getSpaceMembers(form.spaceId);
     const deadlineHours = form.deadlineDuration || 24;
     const deadline = new Date();
@@ -47,6 +53,12 @@ async function createNewResponseNotifications(formId: number, submitterUserId: s
   try {
     const form = await storage.getForm(formId);
     if (!form) return;
+
+    // Skip notifications for Community Feedback space's Platform Feedback form
+    const space = await storage.getSpace(form.spaceId);
+    if (space && space.name === "Community Feedback" && form.title === "Platform Feedback") {
+      return;
+    }
 
     const submitter = await storage.getUser(submitterUserId);
     if (!submitter) return;
