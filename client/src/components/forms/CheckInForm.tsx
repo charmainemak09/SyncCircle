@@ -176,11 +176,12 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
                 <p className="text-xs text-gray-500">Image File</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => window.open(currentValue, '_blank')}
               >
                 <Eye className="w-4 h-4 mr-1" />
@@ -190,6 +191,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="w-4 h-4 mr-1" />
@@ -199,6 +201,7 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
                 type="button"
                 variant="destructive"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleRemoveImage}
               >
                 <X className="w-4 h-4 mr-1" />
@@ -455,11 +458,12 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handlePreview}
               >
                 <Eye className="w-4 h-4 mr-1" />
@@ -469,6 +473,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleDownload}
               >
                 <Download className="w-4 h-4 mr-1" />
@@ -478,6 +483,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="w-4 h-4 mr-1" />
@@ -487,6 +493,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
                 type="button"
                 variant="destructive"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleRemoveFile}
               >
                 <X className="w-4 h-4 mr-1" />
@@ -886,27 +893,26 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       )}
 
       {/* Form Actions */}
-      <div className="flex items-center justify-between pt-6">
+      <div className="pt-6 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
         <Button
           variant="outline"
           onClick={() => autoSaveMutation.mutate(answers)}
           disabled={autoSaveMutation.isPending}
+          className="w-full sm:w-auto"
         >
           Save as Draft
         </Button>
 
-        <div className="flex space-x-4">
-          <Button
-            onClick={handleSubmit}
-            disabled={submitMutation.isPending}
-            className="flex items-center space-x-2"
-          >
-            <Send className="w-4 h-4" />
-            <span>
-              {submitMutation.isPending ? "Submitting..." : "Submit Response"}
-            </span>
-          </Button>
-        </div>
+        <Button
+          onClick={handleSubmit}
+          disabled={submitMutation.isPending}
+          className="w-full sm:w-auto flex items-center justify-center space-x-2"
+        >
+          <Send className="w-4 h-4" />
+          <span>
+            {submitMutation.isPending ? "Submitting..." : "Submit Response"}
+          </span>
+        </Button>
       </div>
     </div>
   );

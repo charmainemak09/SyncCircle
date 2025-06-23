@@ -23,12 +23,12 @@ const spaceIcons = [
 export function SpaceCard({ space }: SpaceCardProps) {
   const iconConfig = spaceIcons[space.id % spaceIcons.length];
   const Icon = iconConfig.icon;
-  
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -49,11 +49,11 @@ export function SpaceCard({ space }: SpaceCardProps) {
               <p className="text-sm text-gray-500">{space.memberCount} members</p>
             </div>
           </div>
-          
+
           {space.description && (
             <p className="text-gray-600 text-sm mb-4 line-clamp-2">{space.description}</p>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Badge variant={space.role === "admin" ? "default" : "secondary"}>
@@ -66,7 +66,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
             </div>
           </div>
         </CardContent>
-        
+
         <div className="bg-gray-50 px-6 py-3 border-t border-gray-100">
           <span className="text-primary text-sm font-medium hover:text-indigo-700">
             View Space →
