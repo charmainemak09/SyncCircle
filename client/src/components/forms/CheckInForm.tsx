@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Save, Send, Star, Upload, X, FileImage, File, FileText, Eye, Download } from "lucide-react";
+import { Save, Send, Star, Upload, X, FileImage, File, FileText, Eye, Download, Trash2 } from "lucide-react";
 import { type Form, type Question, type Answer } from "@shared/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -728,6 +728,21 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
     });
   };
 
+  const clearForm = () => {
+    setAnswers({});
+    setLastSaved(null);
+    
+    // Clear any cached draft data
+    if (!editResponseId) {
+      queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+    }
+    
+    toast({
+      title: "Form cleared",
+      description: "All answers have been removed from the form.",
+    });
+  };
+
   const handleSubmit = () => {
     // Validate required questions
     const questions = form.questions as Question[];
@@ -929,14 +944,26 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
       {/* Form Actions */}
       <div className="pt-4 sm:pt-6 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
-        <Button
-          variant="outline"
-          onClick={() => autoSaveMutation.mutate(answers)}
-          disabled={autoSaveMutation.isPending}
-          className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm"
-        >
-          Save as Draft
-        </Button>
+        <div className="flex space-x-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => autoSaveMutation.mutate(answers)}
+            disabled={autoSaveMutation.isPending}
+            className="flex-1 sm:flex-none sm:w-auto min-h-[44px] text-base sm:text-sm"
+          >
+            Save as Draft
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={clearForm}
+            disabled={Object.keys(answers).length === 0}
+            className="flex-1 sm:flex-none sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
+          >
+            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            <span>Clear</span>
+          </Button>
+        </div>
 
         <Button
           onClick={handleSubmit}
