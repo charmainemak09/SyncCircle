@@ -36,6 +36,9 @@ export function SpaceCard({ space }: SpaceCardProps) {
     return date.toLocaleDateString();
   };
 
+  // Assuming you have a way to identify the feedback space, e.g., by ID or name
+  const isFeedbackSpace = space.name === "Community Feedback"; 
+
   return (
     <Link href={`/spaces/${space.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -51,7 +54,9 @@ export function SpaceCard({ space }: SpaceCardProps) {
           </div>
 
           {space.description && (
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{space.description}</p>
+            <p className={`text-sm mb-4 line-clamp-2 ${isFeedbackSpace ? 'text-purple-700' : 'text-gray-600'}`}>
+              {space.description}
+            </p>
           )}
 
           <div className="flex items-center justify-between">

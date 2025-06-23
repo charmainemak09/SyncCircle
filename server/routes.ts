@@ -257,6 +257,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/spaces", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Ensure user is added to default feedback space
+      await storage.addUserToDefaultFeedbackSpace(userId);
+      
       const spaces = await storage.getUserSpaces(userId);
       res.json(spaces);
     } catch (error) {

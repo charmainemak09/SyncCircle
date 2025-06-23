@@ -1,14 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { SpaceCard } from "@/components/spaces/SpaceCard";
 import { CreateSpaceDialog } from "@/components/spaces/CreateSpaceDialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { MessageSquare, Users } from "lucide-react";
+import { useState } from "react";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -131,10 +131,36 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {spaces.map((space: any) => (
-            <SpaceCard key={space.id} space={space} />
-          ))}
+        <div className="space-y-6">
+          {/* Community Feedback Space (if exists) */}
+          {spaces.find(space => space.name === "Community Feedback") && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                <MessageSquare className="w-5 h-5 mr-2 text-purple-600" />
+                Community Space
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <SpaceCard space={spaces.find(space => space.name === "Community Feedback")!} />
+              </div>
+            </div>
+          )}
+
+          {/* Other Spaces */}
+          {spaces.filter(space => space.name !== "Community Feedback").length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                <Users className="w-5 h-5 mr-2" />
+                Your Spaces
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {spaces
+                  .filter(space => space.name !== "Community Feedback")
+                  .map((space: any) => (
+                    <SpaceCard key={space.id} space={space} />
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

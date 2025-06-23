@@ -59,6 +59,10 @@ export interface IStorage {
 
   deleteSpace(spaceId: number): Promise<boolean>;
   removeSpaceMember(spaceId: number, userId: string): Promise<boolean>;
+
+  getOrCreateDefaultFeedbackSpace(): Promise<Space | undefined>;
+  addUserToDefaultFeedbackSpace(userId: string): Promise<void>;
+  createDefaultFeedbackForm(spaceId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -433,6 +437,132 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error removing space member:", error);
       return false;
+    }
+  }
+
+  async getOrCreateDefaultFeedbackSpace(): Promise<Space | undefined> {
+    try {
+      // Try to find existing default feedback space
+      const [existingSpace] = await db
+        .select()
+        .from(spaces)
+        .where(eq(spaces.name, "Community Feedback"))
+        .limit(1);
+
+      if (existingSpace) {
+        return existingSpace;
+      }
+
+      // Create default feedback space with a system user ID
+      const [defaultSpace] = await db
+        .insert(spaces)
+        .values({
+          name: "Community Feedback",
+          description: "Share your feedback and suggestions to help us improve the platform",
+          inviteCode: "FEEDBACK",
+          ownerId: "system", // Special system owner
+        })
+        .returning();
+
+      return defaultSpace;
+    } catch (error) {
+      console.error("Error getting or creating default feedback space:", error);
+      return undefined;
+    }
+  }
+
+  async addUserToDefaultFeedbackSpace(userId: string): Promise<void> {
+    try {
+      const feedbackSpace = await this.getOrCreateDefaultFeedbackSpace();
+      if (!feedbackSpace) return;
+
+      // Check if user is already a member
+      const [existingMember] = await db
+        .select()
+        .from(spaceMembers)
+        .where(and(
+          eq(spaceMembers.spaceId, feedbackSpace.id),
+          eq(spaceMembers.userId, userId)
+        ))
+        .limit(1);
+
+      if (!existingMember) {
+        await db
+          .insert(spaceMembers)
+          .values({
+            spaceId: feedbackSpace.id,
+            userId: userId,
+            role: "participant",
+          });
+      }
+
+      // Create default feedback form if it doesn't exist
+      await this.createDefaultFeedbackForm(feedbackSpace.id);
+    } catch (error) {
+      console.error("Error adding user to default feedback space:", error);
+    }
+  }
+
+  async createDefaultFeedbackForm(spaceId: number): Promise<void> {
+    try {
+      // Check if feedback form already exists
+      const existingForms = await this.getSpaceForms(spaceId);
+      const feedbackFormExists = existingForms.some(form => form.title === "Platform Feedback");
+
+      if (feedbackFormExists) return;
+
+      const defaultQuestions = [
+        {
+          id: "overall-satisfaction",
+          type: "rating",
+          title: "How satisfied are you with the platform overall?",
+          required: true,
+          maxRating: 5
+        },
+        {
+          id: "most-useful-feature",
+          type: "textarea",
+          title: "What feature do you find most useful and why?",
+          required: false
+        },
+        {
+          id: "improvement-suggestions",
+          type: "textarea",
+          title: "What improvements would you like to see?",
+          required: false
+        },
+        {
+          id: "feature-requests",
+          type: "textarea",
+          title: "Are there any new features you'd like us to add?",
+          required: false
+        },
+        {
+          id: "recommendation",
+          type: "rating",
+          title: "How likely are you to recommend this platform to others?",
+          required: true,
+          maxRating: 10
+        }
+      ];
+
+      await db
+        .insert(forms)
+        .values({
+          title: "Platform Feedback",
+          description: "Help us improve by sharing your thoughts and suggestions",
+          spaceId: spaceId,
+          createdBy: "system",
+          questions: defaultQuestions,
+          frequency: "monthly",
+          sendTime: "09:00",
+          startDate: new Date().toISOString().split('T')[0],
+          deadlineDuration: 168, // 1 week
+          isActive: true,
+        })
+		.returning();
+    } catch (error) {
+      console.error("Error creating default feedback form:", error);
     }
   }
 }
