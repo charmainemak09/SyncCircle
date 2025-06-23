@@ -269,7 +269,7 @@ export default function SpaceDetail() {
 
   const getFormStatusColor = (form: Form) => {
     if (!form.isActive) return "bg-gray-100 text-gray-600";
-    return "bg-secondary/10 text-secondary";
+    return "bg-green-100 text-green-700 border-green-200";
   };
 
   return (
