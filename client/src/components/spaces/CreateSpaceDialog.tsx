@@ -65,7 +65,7 @@ export function CreateSpaceDialog() {
   return (
     <>
       <Button 
-        className="flex items-center space-x-2"
+        className="flex items-center justify-center space-x-2 w-full sm:w-auto"
         onClick={() => {
           console.log("Create Space button clicked - opening dialog");
           console.log("Setting open to true");

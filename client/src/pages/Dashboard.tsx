@@ -59,17 +59,17 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        <div className="mb-6">
+          <div className="mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Your Spaces</h2>
             <p className="text-gray-600 mt-1">
               Manage your team collaboration spaces and check-ins
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
             <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">Join Space</Button>
+                <Button variant="outline" className="w-full sm:w-auto">Join Space</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -118,11 +118,12 @@ export default function Dashboard() {
             <p className="text-gray-600 mb-6">
               Create your first space to start collaborating with your team on recurring check-ins.
             </p>
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
               <CreateSpaceDialog />
               <Button
                 variant="outline"
                 onClick={() => setJoinDialogOpen(true)}
+                className="w-full sm:w-auto"
               >
                 Join Existing Space
               </Button>
