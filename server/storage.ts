@@ -453,14 +453,25 @@ export class DatabaseStorage implements IStorage {
         return existingSpace;
       }
 
-      // Create default feedback space with a system user ID
+      // Get the first user to use as the owner of the feedback space
+      const [firstUser] = await db
+        .select()
+        .from(users)
+        .limit(1);
+
+      if (!firstUser) {
+        console.log("No users found to create default feedback space");
+        return undefined;
+      }
+
+      // Create default feedback space with first user as owner
       const [defaultSpace] = await db
         .insert(spaces)
         .values({
           name: "Community Feedback",
           description: "Share your feedback and suggestions to help us improve the platform",
           inviteCode: "FEEDBACK",
-          ownerId: "system", // Special system owner
+          ownerId: firstUser.id,
         })
         .returning();
 
@@ -546,13 +557,24 @@ export class DatabaseStorage implements IStorage {
         }
       ];
 
+      // Get the first user to use as the form creator
+      const [firstUser] = await db
+        .select()
+        .from(users)
+        .limit(1);
+
+      if (!firstUser) {
+        console.log("No users found to create default feedback form");
+        return;
+      }
+
       await db
         .insert(forms)
         .values({
           title: "Platform Feedback",
           description: "Help us improve by sharing your thoughts and suggestions",
           spaceId: spaceId,
-          createdBy: "system",
+          createdBy: firstUser.id,
           questions: defaultQuestions,
           frequency: "monthly",
           sendTime: "09:00",

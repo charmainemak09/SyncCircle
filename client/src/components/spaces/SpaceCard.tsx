@@ -37,11 +37,11 @@ export function SpaceCard({ space }: SpaceCardProps) {
   };
 
   // Assuming you have a way to identify the feedback space, e.g., by ID or name
-  const isFeedbackSpace = space.name === "Community Feedback"; 
+  const isFeedbackSpace = space.name === "Community Feedback";
 
   return (
     <Link href={`/spaces/${space.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${isFeedbackSpace ? 'border-2 border-purple-500 shadow-lg' : ''}`}>
         <CardContent className="p-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className={`w-12 h-12 ${iconConfig.bg} rounded-lg flex items-center justify-center text-white font-semibold`}>
