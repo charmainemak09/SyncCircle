@@ -595,7 +595,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-    const [, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
   // Load existing response for editing
   const { data: editResponse } = useQuery({
@@ -878,7 +878,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                           </Button>
                         ))}
                       </div>
-                     div>
+                    </div>
                     {answers[question.id] && (
                       <div className="text-center mt-3 sm:mt-2">
                         <span className="text-xs sm:text-sm text-gray-600 font-medium">
