@@ -100,14 +100,14 @@ export function FormBuilder({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       {/* Add Question Dropdown */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <h2 className="text-lg font-semibold text-gray-900">Form Builder</h2>
         <Select onValueChange={(value: QuestionType) => addQuestion(value)}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48 min-h-[44px]">
             <div className="flex items-center">
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
               <SelectValue placeholder="Add Question" />
             </div>
           </SelectTrigger>
@@ -129,13 +129,14 @@ export function FormBuilder({
         <div className="space-y-6">
           {/* Form Title */}
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-4 sm:p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Form Title</label>
               <Input
                 value={title}
                 onChange={(e) => onTitleChange(e.target.value)}
                 placeholder="Enter form title..."
                 maxLength={100}
+                className="min-h-[44px] text-base sm:text-sm"
               />
             </CardContent>
           </Card>
@@ -143,41 +144,46 @@ export function FormBuilder({
           {/* Questions */}
           {questions.map((question, index) => (
             <Card key={question.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
+              <CardHeader className="pb-3 px-4 pt-4 sm:px-6 sm:pt-6">
+                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                   <CardTitle className="text-sm font-medium text-gray-700">
                     Question {index + 1}
                   </CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">
+                  <div className="flex items-center justify-between sm:justify-end space-x-2">
+                    <Badge variant="secondary" className="text-xs">
                       {questionTypes.find(t => t.value === question.type)?.label}
                     </Badge>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingQuestion(
-                        editingQuestion === question.id ? null : question.id
-                      )}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteQuestion(question.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingQuestion(
+                          editingQuestion === question.id ? null : question.id
+                        )}
+                        className="min-h-[36px] min-w-[36px] p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteQuestion(question.id)}
+                        className="min-h-[36px] min-w-[36px] p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
                 <div className="space-y-4">
                   <Input
                     value={question.title}
                     onChange={(e) => updateQuestion(question.id, { title: e.target.value })}
                     placeholder="Enter your question..."
                     maxLength={200}
+                    className="min-h-[44px] text-base sm:text-sm"
                   />
 
                   {editingQuestion === question.id && (

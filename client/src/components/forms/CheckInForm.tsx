@@ -764,30 +764,30 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{form.title}</h2>
+    <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{form.title}</h2>
         {form.description && (
-          <p className="text-gray-600 mb-3">{form.description}</p>
+          <p className="text-sm sm:text-base text-gray-600 mb-3">{form.description}</p>
         )}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs sm:text-sm text-blue-800">
           <div className="flex items-center justify-center space-x-2">
-            <Send className="w-4 h-4" />
-            <span>You can submit multiple responses to this check-in form</span>
+            <Send className="w-4 h-4 flex-shrink-0" />
+            <span className="text-center">You can submit multiple responses to this check-in form</span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {questions.map((question, index) => (
           <Card key={question.id}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Label className="text-lg font-medium text-gray-900">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
+                <Label className="text-base sm:text-lg font-medium text-gray-900 leading-relaxed">
                   {index + 1}. {question.title}
                 </Label>
                 {question.required && (
-                  <Badge variant="secondary">Required</Badge>
+                  <Badge variant="secondary" className="self-start sm:self-auto">Required</Badge>
                 )}
               </div>
 
@@ -798,6 +798,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                     onChange={(e) => updateAnswer(question.id, e.target.value)}
                     placeholder="Enter your answer..."
                     maxLength={500}
+                    className="min-h-[44px] text-base sm:text-sm"
                   />
                   <div className="text-xs text-gray-500 text-right">
                     {(answers[question.id] || "").length}/500 characters
@@ -813,6 +814,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                     placeholder="Share your thoughts..."
                     rows={4}
                     maxLength={2000}
+                    className="min-h-[120px] text-base sm:text-sm resize-none"
                   />
                   <div className="text-xs text-gray-500 text-right">
                     {(answers[question.id] || "").length}/2000 characters
@@ -824,34 +826,46 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                 <RadioGroup
                   value={answers[question.id] || ""}
                   onValueChange={(value) => updateAnswer(question.id, value)}
+                  className="space-y-3"
                 >
                   {question.options.map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option} id={`${question.id}-${optionIndex}`} />
-                      <Label htmlFor={`${question.id}-${optionIndex}`}>{option}</Label>
+                    <div key={optionIndex} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`${question.id}-${optionIndex}`}
+                        className="min-w-[20px] min-h-[20px]"
+                      />
+                      <Label 
+                        htmlFor={`${question.id}-${optionIndex}`}
+                        className="text-sm sm:text-base cursor-pointer flex-1 leading-relaxed py-1"
+                      >
+                        {option}
+                      </Label>
                     </div>
                   ))}
                 </RadioGroup>
               )}
 
               {question.type === "rating" && (
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500">Poor</span>
-                  <div className="flex space-x-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs sm:text-sm text-gray-500">Poor</span>
+                    <span className="text-xs sm:text-sm text-gray-500">Excellent</span>
+                  </div>
+                  <div className="flex justify-center space-x-2 sm:space-x-3">
                     {Array.from({ length: question.maxRating || 5 }, (_, i) => i + 1).map((rating) => (
                       <Button
                         key={rating}
                         type="button"
                         variant={answers[question.id] === rating ? "default" : "outline"}
                         size="sm"
-                        className="w-10 h-10 rounded-full"
+                        className="w-12 h-12 sm:w-10 sm:h-10 rounded-full text-sm font-semibold touch-manipulation"
                         onClick={() => updateAnswer(question.id, rating)}
                       >
                         {rating}
                       </Button>
                     ))}
                   </div>
-                  <span className="text-sm text-gray-500">Excellent</span>
                 </div>
               )}
 
@@ -878,10 +892,10 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       {/* Auto-save indicator */}
       {!editResponseId && (
         <Card className="bg-gray-50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-sm text-gray-600">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center space-x-2">
-                <Save className="w-4 h-4 text-secondary" />
+                <Save className="w-4 h-4 text-secondary flex-shrink-0" />
                 <span>All changes saved automatically</span>
               </div>
               <span className="text-xs text-gray-500">
@@ -893,12 +907,12 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       )}
 
       {/* Form Actions */}
-      <div className="pt-6 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+      <div className="pt-4 sm:pt-6 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
         <Button
           variant="outline"
           onClick={() => autoSaveMutation.mutate(answers)}
           disabled={autoSaveMutation.isPending}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm"
         >
           Save as Draft
         </Button>
@@ -906,9 +920,9 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
         <Button
           onClick={handleSubmit}
           disabled={submitMutation.isPending}
-          className="w-full sm:w-auto flex items-center justify-center space-x-2"
+          className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-4 h-4 flex-shrink-0" />
           <span>
             {submitMutation.isPending ? "Submitting..." : "Submit Response"}
           </span>
