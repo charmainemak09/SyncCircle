@@ -172,7 +172,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl">
         <Card className="bg-gradient-to-br from-primary to-indigo-600 text-white">
           <CardContent className="p-4 sm:p-6">
             <div className="text-xl sm:text-2xl font-bold mb-2">{stats.totalResponses}</div>
@@ -184,15 +184,6 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
           <CardContent className="p-4 sm:p-6">
             <div className="text-xl sm:text-2xl font-bold mb-2">{stats.completionRate}%</div>
             <div className="text-green-100 text-xs sm:text-sm">Response Rate</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-          <CardContent className="p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold mb-2">
-              {responses.length > 0 ? "2.5h" : "--"}
-            </div>
-            <div className="text-purple-100 text-xs sm:text-sm">Avg. Time</div>
           </CardContent>
         </Card>
       </div>
