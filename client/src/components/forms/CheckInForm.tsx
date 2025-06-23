@@ -848,25 +848,42 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
               {question.type === "rating" && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between px-2 sm:px-0">
-                    <span className="text-xs sm:text-sm text-gray-500">Poor</span>
-                    <span className="text-xs sm:text-sm text-gray-500">Excellent</span>
+                  <div className="flex items-center justify-between px-3 sm:px-0">
+                    <span className="text-xs sm:text-sm text-gray-500 font-medium">Poor</span>
+                    <span className="text-xs sm:text-sm text-gray-500 font-medium">Excellent</span>
                   </div>
-                  <div className="px-4 py-3 sm:px-0 sm:py-0">
-                    <div className="flex justify-center space-x-2 sm:space-x-3 max-w-full overflow-x-auto">
+                  <div className="px-3 py-4 sm:px-0 sm:py-2 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none">
+                    <div className="flex justify-center items-center space-x-2 sm:space-x-3 max-w-full overflow-x-auto scrollbar-hide">
                       {Array.from({ length: question.maxRating || 5 }, (_, i) => i + 1).map((rating) => (
                         <Button
                           key={rating}
                           type="button"
                           variant={answers[question.id] === rating ? "default" : "outline"}
                           size="sm"
-                          className="w-12 h-12 sm:w-10 sm:h-10 rounded-full text-sm font-semibold touch-manipulation flex-shrink-0"
+                          className={`
+                            w-12 h-12 sm:w-11 sm:h-11 rounded-full text-sm font-bold touch-manipulation flex-shrink-0 
+                            transition-all duration-200 ease-in-out
+                            ${answers[question.id] === rating 
+                              ? 'scale-110 sm:scale-105 shadow-lg ring-2 ring-primary/20' 
+                              : 'hover:scale-105 hover:shadow-md'
+                            }
+                            focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none
+                            active:scale-95
+                          `}
                           onClick={() => updateAnswer(question.id, rating)}
+                          aria-label={`Rate ${rating} out of ${question.maxRating || 5}`}
                         >
                           {rating}
                         </Button>
                       ))}
                     </div>
+                    {answers[question.id] && (
+                      <div className="text-center mt-3 sm:mt-2">
+                        <span className="text-xs sm:text-sm text-gray-600 font-medium">
+                          {answers[question.id]} out of {question.maxRating || 5} selected
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

@@ -330,6 +330,16 @@
     touch-action: manipulation;
   }
 
+  /* Hide scrollbars while maintaining functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Mobile-first responsive typography */
   @media (max-width: 480px) {
     h1 {
@@ -361,6 +371,23 @@
       min-height: 48px;
       padding: 12px 16px;
       font-size: 16px;
+    }
+
+    /* Enhanced rating buttons for mobile */
+    [role="button"]:active,
+    button:active {
+      transform: scale(0.95);
+    }
+
+    /* Improved form spacing on mobile */
+    .form-container {
+      padding: 1rem;
+    }
+
+    /* Better visual feedback for selected items */
+    .selected-item {
+      background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+      box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
     }
   }
 
