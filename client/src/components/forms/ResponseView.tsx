@@ -19,9 +19,10 @@ interface ResponseViewProps {
   };
   formTitle: string;
   currentUserId?: string;
+  formFrequency?: string;
 }
 
-export function ResponseView({ responses, questions, stats, formTitle, currentUserId }: ResponseViewProps) {
+export function ResponseView({ responses, questions, stats, formTitle, currentUserId, formFrequency }: ResponseViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [, setLocation] = useLocation();
@@ -183,7 +184,9 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         <Card className="bg-gradient-to-br from-secondary to-green-600 text-white">
           <CardContent className="p-4 sm:p-6">
             <div className="text-xl sm:text-2xl font-bold mb-2">{stats.completionRate}%</div>
-            <div className="text-green-100 text-xs sm:text-sm">Response Rate</div>
+            <div className="text-green-100 text-xs sm:text-sm">
+              Response Rate {formFrequency ? `(${formFrequency})` : ''}
+            </div>
           </CardContent>
         </Card>
       </div>

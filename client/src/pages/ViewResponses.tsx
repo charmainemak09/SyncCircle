@@ -99,6 +99,7 @@ export default function ViewResponses() {
           stats={stats}
           formTitle={(form as any).title}
           currentUserId={(user as any)?.id}
+          formFrequency={(form as any)?.frequency}
         />
 
     </div>
