@@ -146,12 +146,12 @@ export default function Dashboard() {
           )}
 
           {/* Other Spaces */}
-          {spaces.filter(space => space.name !== "Community Feedback").length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                <Users className="w-5 h-5 mr-2" />
-                Your Spaces
-              </h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Your Spaces
+            </h3>
+            {spaces.filter(space => space.name !== "Community Feedback").length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {spaces
                   .filter(space => space.name !== "Community Feedback")
@@ -159,8 +159,28 @@ export default function Dashboard() {
                     <SpaceCard key={space.id} space={space} />
                   ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <Card className="text-center py-8">
+                <div className="text-4xl mb-3">👥</div>
+                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                  No personal spaces yet
+                </h4>
+                <p className="text-gray-600 mb-4">
+                  Create a space for your team or join an existing one to start collaborating.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                  <CreateSpaceDialog />
+                  <Button
+                    variant="outline"
+                    onClick={() => setJoinDialogOpen(true)}
+                    className="w-full sm:w-auto"
+                  >
+                    Join Space
+                  </Button>
+                </div>
+              </Card>
+            )}
+          </div>
         </div>
       )}
     </div>
