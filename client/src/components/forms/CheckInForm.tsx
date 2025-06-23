@@ -848,23 +848,25 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
               {question.type === "rating" && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between px-2 sm:px-0">
                     <span className="text-xs sm:text-sm text-gray-500">Poor</span>
                     <span className="text-xs sm:text-sm text-gray-500">Excellent</span>
                   </div>
-                  <div className="flex justify-center space-x-2 sm:space-x-3">
-                    {Array.from({ length: question.maxRating || 5 }, (_, i) => i + 1).map((rating) => (
-                      <Button
-                        key={rating}
-                        type="button"
-                        variant={answers[question.id] === rating ? "default" : "outline"}
-                        size="sm"
-                        className="w-12 h-12 sm:w-10 sm:h-10 rounded-full text-sm font-semibold touch-manipulation"
-                        onClick={() => updateAnswer(question.id, rating)}
-                      >
-                        {rating}
-                      </Button>
-                    ))}
+                  <div className="px-4 py-3 sm:px-0 sm:py-0">
+                    <div className="flex justify-center space-x-2 sm:space-x-3 max-w-full overflow-x-auto">
+                      {Array.from({ length: question.maxRating || 5 }, (_, i) => i + 1).map((rating) => (
+                        <Button
+                          key={rating}
+                          type="button"
+                          variant={answers[question.id] === rating ? "default" : "outline"}
+                          size="sm"
+                          className="w-12 h-12 sm:w-10 sm:h-10 rounded-full text-sm font-semibold touch-manipulation flex-shrink-0"
+                          onClick={() => updateAnswer(question.id, rating)}
+                        >
+                          {rating}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
