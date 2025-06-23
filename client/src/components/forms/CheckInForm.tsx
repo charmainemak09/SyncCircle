@@ -852,31 +852,33 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
                     <span className="text-xs sm:text-sm text-gray-500 font-medium">Poor</span>
                     <span className="text-xs sm:text-sm text-gray-500 font-medium">Excellent</span>
                   </div>
-                  <div className="px-3 py-4 sm:px-0 sm:py-2 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none">
-                    <div className="flex justify-center items-center space-x-1 sm:space-x-2 max-w-full overflow-x-auto scrollbar-hide pb-2">
-                      {Array.from({ length: question.maxRating || 10 }, (_, i) => i + 1).map((rating) => (
-                        <Button
-                          key={rating}
-                          type="button"
-                          variant={answers[question.id] === rating ? "default" : "outline"}
-                          size="sm"
-                          className={`
-                            w-10 h-10 sm:w-9 sm:h-9 rounded-full text-xs sm:text-sm font-bold touch-manipulation flex-shrink-0 
-                            transition-all duration-200 ease-in-out
-                            ${answers[question.id] === rating 
-                              ? 'scale-110 sm:scale-105 shadow-lg ring-2 ring-primary/20' 
-                              : 'hover:scale-105 hover:shadow-md'
-                            }
-                            focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none
-                            active:scale-95
-                          `}
-                          onClick={() => updateAnswer(question.id, rating)}
-                          aria-label={`Rate ${rating} out of ${question.maxRating || 10}`}
-                        >
-                          {rating}
-                        </Button>
-                      ))}
-                    </div>
+                  <div className="px-2 py-4 sm:px-0 sm:py-2 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none">
+                    <div className="w-full overflow-x-auto scrollbar-hide">
+                      <div className="flex items-center justify-start sm:justify-center space-x-1 sm:space-x-2 min-w-max px-2 pb-2">
+                        {Array.from({ length: question.maxRating || 10 }, (_, i) => i + 1).map((rating) => (
+                          <Button
+                            key={rating}
+                            type="button"
+                            variant={answers[question.id] === rating ? "default" : "outline"}
+                            size="sm"
+                            className={`
+                              w-9 h-9 sm:w-8 sm:h-8 rounded-full text-xs font-bold touch-manipulation flex-shrink-0 
+                              transition-all duration-200 ease-in-out
+                              ${answers[question.id] === rating 
+                                ? 'scale-110 sm:scale-105 shadow-lg ring-2 ring-primary/20' 
+                                : 'hover:scale-105 hover:shadow-md'
+                              }
+                              focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none
+                              active:scale-95
+                            `}
+                            onClick={() => updateAnswer(question.id, rating)}
+                            aria-label={`Rate ${rating} out of ${question.maxRating || 10}`}
+                          >
+                            {rating}
+                          </Button>
+                        ))}
+                      </div>
+                     div>
                     {answers[question.id] && (
                       <div className="text-center mt-3 sm:mt-2">
                         <span className="text-xs sm:text-sm text-gray-600 font-medium">

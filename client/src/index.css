@@ -340,6 +340,17 @@
     display: none;
   }
 
+  /* Ensure rating containers have proper scrolling */
+  .rating-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Improve button spacing for rating scales */
+  .rating-buttons {
+    white-space: nowrap;
+  }
+
   /* Mobile-first responsive typography */
   @media (max-width: 480px) {
     h1 {
