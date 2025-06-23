@@ -60,8 +60,8 @@ async function createNewResponseNotifications(formId: number, submitterUserId: s
         userId: member.userId,
         spaceId: form.spaceId,
         type: "new_response",
-        title: "New Response Submitted",
-        message: `${submitter.firstName} ${submitter.lastName} has submitted their response to "${form.title}". Click to view.`,
+        title: `${submitter.firstName} ${submitter.lastName} submitted a response`,
+        message: `New response submitted to "${form.title}". Click to view all responses.`,
         formId: form.id,
         isRead: false
       }));
