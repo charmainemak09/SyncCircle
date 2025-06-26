@@ -622,14 +622,29 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
   // Auto-save mutation
   const autoSaveMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/responses", {
-      formId: form.id,
-      answers: data,
-      isDraft: true,
-    }),
+    mutationFn: (data: any) => {
+      if (editResponseId) {
+        // For edits, update the existing response as draft
+        return apiRequest("PUT", `/api/responses/${editResponseId}`, {
+          answers: data,
+          isDraft: true,
+        });
+      } else {
+        // For new responses, create/update draft
+        return apiRequest("POST", "/api/responses", {
+          formId: form.id,
+          answers: data,
+          isDraft: true,
+        });
+      }
+    },
     onSuccess: () => {
       setLastSaved(new Date());
-      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      if (editResponseId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      }
     },
   });
 
@@ -643,24 +658,12 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           isDraft: false,
         });
       } else {
-        // Create new response and clear any existing draft
+        // Create new response
         const response = await apiRequest("POST", "/api/responses", {
           formId: form.id,
           answers: data,
           isDraft: false,
         });
-        
-        // Clear the draft from server by submitting empty answers
-        try {
-          await apiRequest("POST", "/api/responses", {
-            formId: form.id,
-            answers: {},
-            isDraft: true,
-          });
-        } catch (error) {
-          // Ignore errors when clearing draft
-          console.log("Failed to clear draft:", error);
-        }
         
         return response;
       }
@@ -684,17 +687,18 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
         });
       }
       
-      // Clear the form and draft for all submissions (both new and edits)
-      setAnswers({});
-      setLastSaved(null);
-      
-      // Remove cached data and invalidate queries
-      queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
-      
       if (editResponseId) {
-        queryClient.removeQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+        // For edits, don't clear the form - keep the updated data visible
+        // Just invalidate the specific response and response list
         queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+      } else {
+        // For new submissions, clear the form and draft
+        setAnswers({});
+        setLastSaved(null);
+        
+        // Remove cached data and invalidate queries
+        queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
       }
 
       onSubmit?.();
@@ -708,16 +712,16 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
     },
   });
 
-  // Auto-save when answers change (only for new responses, not edits)
+  // Auto-save when answers change (for both new responses and edits)
   useEffect(() => {
-    if (!editResponseId && Object.keys(answers).length > 0) {
+    if (Object.keys(answers).length > 0) {
       const timeoutId = setTimeout(() => {
         autoSaveMutation.mutate(answers);
       }, 2000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [answers, editResponseId]);
+  }, [answers]);
 
   const updateAnswer = (questionId: string, value: any) => {
     console.log("Updating answer for question:", questionId, "with value:", value);
@@ -944,21 +948,19 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       </div>
 
       {/* Auto-save indicator */}
-      {!editResponseId && (
-        <Card className="bg-gray-50">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 text-xs sm:text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
-                <Save className="w-4 h-4 text-secondary flex-shrink-0" />
-                <span>All changes saved automatically</span>
-              </div>
-              <span className="text-xs text-gray-500">
-                Last saved: {formatLastSaved()}
-              </span>
+      <Card className="bg-gray-50">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 text-xs sm:text-sm text-gray-600">
+            <div className="flex items-center space-x-2">
+              <Save className="w-4 h-4 text-secondary flex-shrink-0" />
+              <span>{editResponseId ? "Changes saved automatically" : "All changes saved automatically"}</span>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <span className="text-xs text-gray-500">
+              Last saved: {formatLastSaved()}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Form Actions */}
       <div className="pt-4 sm:pt-6 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
