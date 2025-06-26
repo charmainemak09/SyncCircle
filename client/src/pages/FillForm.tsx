@@ -57,7 +57,7 @@ export default function FillForm() {
   }
 
   const handleSubmitComplete = () => {
-    setLocation(`/spaces/${form?.spaceId}`);
+    setLocation(`/spaces/${(form as any)?.spaceId}`);
   };
 
   return (
@@ -66,7 +66,7 @@ export default function FillForm() {
       <div className="mb-8">
         <Button
           variant="ghost"
-          onClick={() => setLocation(`/spaces/${form?.spaceId}`)}
+          onClick={() => setLocation(`/spaces/${(form as any)?.spaceId}`)}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -75,7 +75,7 @@ export default function FillForm() {
       </div>
 
       {/* Form */}
-      {form && <CheckInForm form={form} onSubmit={handleSubmitComplete} editResponseId={editResponseId || undefined} />}
+      {form && <CheckInForm form={form as any} onSubmit={handleSubmitComplete} editResponseId={editResponseId || undefined} />}
     </div>
   );
 }
