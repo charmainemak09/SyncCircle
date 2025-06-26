@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { type Form } from "@shared/schema";
 
 export default function FillForm() {
   const { formId } = useParams();
@@ -12,10 +13,13 @@ export default function FillForm() {
   const [location, setLocation] = useLocation();
 
   // Extract edit parameter from URL
-  const searchParams = new URLSearchParams(location.split('?')[1]);
+  const urlParts = location.split('?');
+  const searchParams = urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
   const editResponseId = searchParams.get('edit');
+  
+  console.log("FillForm - location:", location, "editResponseId:", editResponseId);
 
-  const { data: form, isLoading, error } = useQuery({
+  const { data: form, isLoading, error } = useQuery<Form>({
     queryKey: [`/api/forms/${formId}`],
   });
 
@@ -53,7 +57,7 @@ export default function FillForm() {
   }
 
   const handleSubmitComplete = () => {
-    setLocation(`/spaces/${form.spaceId}`);
+    setLocation(`/spaces/${form?.spaceId}`);
   };
 
   return (
@@ -62,7 +66,7 @@ export default function FillForm() {
       <div className="mb-8">
         <Button
           variant="ghost"
-          onClick={() => setLocation(`/spaces/${form.spaceId}`)}
+          onClick={() => setLocation(`/spaces/${form?.spaceId}`)}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -71,7 +75,7 @@ export default function FillForm() {
       </div>
 
       {/* Form */}
-      <CheckInForm form={form} editResponseId={editResponseId || undefined} />
+      {form && <CheckInForm form={form} onSubmit={handleSubmitComplete} editResponseId={editResponseId || undefined} />}
     </div>
   );
 }

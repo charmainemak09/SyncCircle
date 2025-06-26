@@ -596,6 +596,8 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  
+  console.log("CheckInForm - editResponseId:", editResponseId, "form:", form.id);
 
   // Load existing response for editing
   const { data: editResponse } = useQuery({
