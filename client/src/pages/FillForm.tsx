@@ -17,7 +17,10 @@ export default function FillForm() {
   const searchParams = urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
   const editResponseId = searchParams.get('edit');
   
-  console.log("FillForm - location:", location, "editResponseId:", editResponseId);
+  console.log("FillForm - full location:", location);
+  console.log("FillForm - URL parts:", urlParts);
+  console.log("FillForm - search params string:", urlParts[1] || 'none');
+  console.log("FillForm - editResponseId:", editResponseId);
 
   const { data: form, isLoading, error } = useQuery<Form>({
     queryKey: [`/api/forms/${formId}`],

@@ -152,6 +152,9 @@ Changelog:
 - June 17, 2025. Integrated automatic notification creation when forms are activated and responses submitted
 - June 17, 2025. Fixed notification triggers for new form creation and added click-to-navigate functionality
 - June 17, 2025. Completed notification system testing - all space members receive form reminders and response alerts
+- June 23, 2025. Fixed edit functionality to prevent duplicate records - backend now automatically updates existing responses instead of creating new ones
+- June 23, 2025. Enhanced edit URL parsing and added debugging logs to track edit mode detection
+- June 23, 2025. Improved auto-save functionality to work for both new responses and edits
 ```
 
 ## User Preferences

@@ -752,16 +752,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not a member of this space" });
       }
 
-      // For recurring responses, check if there's an existing draft to update
-      // Otherwise, create a new response (allowing multiple submissions)
+      // Check for existing responses to update instead of creating duplicates
       const existingDraft = await storage.getUserFormDraft(responseData.formId, userId);
+      const existingResponse = await storage.getUserFormResponse(responseData.formId, userId);
       
       let response;
       if (responseData.isDraft && existingDraft) {
         // Update existing draft
         response = await storage.updateResponse(existingDraft.id, responseData);
+      } else if (!responseData.isDraft && existingResponse) {
+        // Update existing final response instead of creating duplicate
+        response = await storage.updateResponse(existingResponse.id, responseData);
       } else {
-        // Create new response (draft or final submission)
+        // Create new response (only when no existing response found)
         response = await storage.createResponse(responseData);
         
         // If this is a final submission (not draft), create notifications
