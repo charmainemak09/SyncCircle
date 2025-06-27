@@ -402,6 +402,26 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  async deleteSpace(spaceId: number): Promise<boolean> {
+    try {
+      // Delete related records first (foreign key constraints)
+      await db.delete(notifications).where(eq(notifications.spaceId, spaceId));
+      await db.delete(responses).where(
+        inArray(responses.formId, 
+          db.select({ id: forms.id }).from(forms).where(eq(forms.spaceId, spaceId))
+        )
+      );
+      await db.delete(forms).where(eq(forms.spaceId, spaceId));
+      await db.delete(spaceMembers).where(eq(spaceMembers.spaceId, spaceId));
+      await db.delete(spaces).where(eq(spaces.id, spaceId));
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting space:", error);
+      return false;
+    }
+  }
+
   async removeSpaceMember(spaceId: number, userId: string): Promise<boolean> {
     try {
       const result = await db

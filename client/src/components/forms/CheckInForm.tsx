@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Save, Send, Star, Upload, X, FileImage, File, FileText, Eye, Download, Trash2 } from "lucide-react";
+import { Save, Send, Star, Upload, X, FileImage, File, FileText, Eye, Download, Trash2, Edit } from "lucide-react";
 import { type Form, type Question, type Answer } from "@shared/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -650,64 +650,112 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
     },
   });
 
-  // Submit mutation
+  // Submit mutation (for new submissions only)
   const submitMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (editResponseId) {
-        // Update existing response
-        return apiRequest("PUT", `/api/responses/${editResponseId}`, {
-          answers: data,
-          isDraft: false,
-        });
-      } else {
-        // Create new response
-        const response = await apiRequest("POST", "/api/responses", {
-          formId: form.id,
-          answers: data,
-          isDraft: false,
-        });
-        
-        return response;
-      }
+      // SUBMIT MODE: Always create new final submission
+      const response = await apiRequest("POST", "/api/responses", {
+        formId: form.id,
+        answers: data,
+        isDraft: false,
+      });
+      
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/responses`] });
       queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
-      if (editResponseId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
-      }
 
-      if (editResponseId) {
-        toast({
-          title: "Response updated successfully",
-          description: "Your check-in response has been updated.",
-        });
-      } else {
-        toast({
-          title: "Response submitted successfully",
-          description: "Thank you for your check-in! You can submit another response anytime.",
-        });
-      }
+      toast({
+        title: "Response submitted successfully",
+        description: "Thank you for your check-in! You can submit another response anytime.",
+      });
       
-      if (editResponseId) {
-        // For edits, don't clear the form - keep the updated data visible
-        // Just invalidate the specific response and response list
-        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
-      } else {
-        // For new submissions, clear the form and draft
-        setAnswers({});
-        setLastSaved(null);
-        
-        // Remove cached data and invalidate queries
-        queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
-      }
+      // For new submissions, clear the form and draft
+      setAnswers({});
+      setLastSaved(null);
+      
+      // Remove cached data and invalidate queries
+      queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
 
       onSubmit?.();
     },
     onError: (error: any) => {
       toast({
         title: "Failed to submit response",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update mutation (for editing existing responses)
+  const updateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (!editResponseId) {
+        throw new Error("No response ID provided for update");
+      }
+      // UPDATE MODE: Update existing response
+      return apiRequest("PUT", `/api/responses/${editResponseId}`, {
+        answers: data,
+        isDraft: false,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/responses`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+
+      toast({
+        title: "Response updated successfully",
+        description: "Your check-in response has been updated.",
+      });
+
+      onSubmit?.();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to update response",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Save mutation (for drafts)
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (editResponseId) {
+        // Update existing response as draft
+        return apiRequest("PUT", `/api/responses/${editResponseId}`, {
+          answers: data,
+          isDraft: true,
+        });
+      } else {
+        // Create/update draft
+        return apiRequest("POST", "/api/responses", {
+          formId: form.id,
+          answers: data,
+          isDraft: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      setLastSaved(new Date());
+      if (editResponseId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/responses/${editResponseId}`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+      }
+      
+      toast({
+        title: "Draft saved",
+        description: "Your response has been saved as a draft.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to save draft",
         description: error.message || "Please try again.",
         variant: "destructive",
       });
@@ -969,11 +1017,11 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
         <div className="flex space-x-2 w-full sm:w-auto">
           <Button
             variant="outline"
-            onClick={() => autoSaveMutation.mutate(answers)}
-            disabled={autoSaveMutation.isPending}
+            onClick={() => saveMutation.mutate(answers)}
+            disabled={saveMutation.isPending || Object.keys(answers).length === 0}
             className="flex-1 sm:flex-none sm:w-auto min-h-[44px] text-base sm:text-sm"
           >
-            Save as Draft
+            {saveMutation.isPending ? "Saving..." : "Save"}
           </Button>
           
           <Button
@@ -987,16 +1035,29 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           </Button>
         </div>
 
-        <Button
-          onClick={handleSubmit}
-          disabled={submitMutation.isPending}
-          className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
-        >
-          <Send className="w-4 h-4 flex-shrink-0" />
-          <span>
-            {submitMutation.isPending ? "Submitting..." : "Submit Response"}
-          </span>
-        </Button>
+        {editResponseId ? (
+          <Button
+            onClick={() => updateMutation.mutate(answers)}
+            disabled={updateMutation.isPending || Object.keys(answers).length === 0}
+            className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
+          >
+            <Edit className="w-4 h-4 flex-shrink-0" />
+            <span>
+              {updateMutation.isPending ? "Updating..." : "Update"}
+            </span>
+          </Button>
+        ) : (
+          <Button
+            onClick={() => submitMutation.mutate(answers)}
+            disabled={submitMutation.isPending || Object.keys(answers).length === 0}
+            className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
+          >
+            <Send className="w-4 h-4 flex-shrink-0" />
+            <span>
+              {submitMutation.isPending ? "Submitting..." : "Submit"}
+            </span>
+          </Button>
+        )}
       </div>
     </div>
   );
