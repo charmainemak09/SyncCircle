@@ -752,25 +752,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not a member of this space" });
       }
 
-      // Check for existing responses to update instead of creating duplicates
-      const existingDraft = await storage.getUserFormDraft(responseData.formId, userId);
-      const existingResponse = await storage.getUserFormResponse(responseData.formId, userId);
-      
       let response;
-      if (responseData.isDraft && existingDraft) {
-        // Update existing draft
-        response = await storage.updateResponse(existingDraft.id, responseData);
-      } else if (!responseData.isDraft && existingResponse) {
-        // Update existing final response instead of creating duplicate
-        response = await storage.updateResponse(existingResponse.id, responseData);
+      
+      if (responseData.isDraft) {
+        // SAVE MODE: Handle draft storage
+        const existingDraft = await storage.getUserFormDraft(responseData.formId, userId);
+        if (existingDraft) {
+          // Update existing draft
+          response = await storage.updateResponse(existingDraft.id, responseData);
+        } else {
+          // Create new draft
+          response = await storage.createResponse(responseData);
+        }
       } else {
-        // Create new response (only when no existing response found)
+        // SUBMIT MODE: Create new final submission
+        // First, delete any existing draft since we're submitting
+        const existingDraft = await storage.getUserFormDraft(responseData.formId, userId);
+        if (existingDraft) {
+          await storage.deleteResponse(existingDraft.id);
+        }
+        
+        // Always create a new final submission
         response = await storage.createResponse(responseData);
         
-        // If this is a final submission (not draft), create notifications
-        if (!responseData.isDraft) {
-          await createNewResponseNotifications(responseData.formId, userId);
-        }
+        // Create notifications for new submission
+        await createNewResponseNotifications(responseData.formId, userId);
       }
 
       res.json(response);

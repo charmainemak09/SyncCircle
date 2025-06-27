@@ -44,6 +44,7 @@ export interface IStorage {
   getUserFormResponses(formId: number, userId: string): Promise<Response[]>;
   createResponse(response: InsertResponse): Promise<Response>;
   updateResponse(id: number, updates: Partial<InsertResponse>): Promise<Response | undefined>;
+  deleteResponse(id: number): Promise<boolean>;
   getFormResponseStats(formId: number): Promise<{
     totalResponses: number;
     completionRate: number;
@@ -297,6 +298,11 @@ export class DatabaseStorage implements IStorage {
     return response || undefined;
   }
 
+  async deleteResponse(id: number): Promise<boolean> {
+    const result = await db.delete(responses).where(eq(responses.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
   async getFormResponseStats(formId: number): Promise<{
     totalResponses: number;
     completionRate: number;
@@ -392,39 +398,9 @@ export class DatabaseStorage implements IStorage {
     return result?.count || 0;
   }
 
-  async updateSpace(spaceId: number, updates: { name?: string; description?: string }): Promise<any> {
-    try {
-      const result = await db
-        .update(spaces)
-        .set(updates)
-        .where(eq(spaces.id, spaceId))
-        .returning();
-      return result[0] || null;
-    } catch (error) {
-      console.error("Error updating space:", error);
-      return null;
-    }
-  }
 
-  async deleteSpace(spaceId: number): Promise<boolean> {
-    try {
-      // Delete related records first (foreign key constraints)
-      await db.delete(notifications).where(eq(notifications.spaceId, spaceId));
-      await db.delete(responses).where(
-        inArray(responses.formId, 
-          db.select({ id: forms.id }).from(forms).where(eq(forms.spaceId, spaceId))
-        )
-      );
-      await db.delete(forms).where(eq(forms.spaceId, spaceId));
-      await db.delete(spaceMembers).where(eq(spaceMembers.spaceId, spaceId));
-      await db.delete(spaces).where(eq(spaces.id, spaceId));
 
-      return true;
-    } catch (error) {
-      console.error("Error deleting space:", error);
-      return false;
-    }
-  }
+
 
   async removeSpaceMember(spaceId: number, userId: string): Promise<boolean> {
     try {
@@ -582,7 +558,7 @@ export class DatabaseStorage implements IStorage {
           deadlineDuration: 168, // 1 week
           isActive: true,
         })
-		.returning();
+                .returning();
     } catch (error) {
       console.error("Error creating default feedback form:", error);
     }
