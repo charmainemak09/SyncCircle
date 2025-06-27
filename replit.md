@@ -162,6 +162,9 @@ Changelog:
 - June 27, 2025. Added delete functionality allowing users to delete their own responses with proper permission checks
 - June 27, 2025. Implemented DELETE /api/responses/:id endpoint with user ownership validation
 - June 27, 2025. Added delete button to response view with confirmation dialog and error handling
+- June 27, 2025. Fixed clear button functionality with confirmation dialog and improved state management
+- June 27, 2025. Enhanced form clearing to prevent auto-reload of saved data after clearing
+- June 27, 2025. Added isCleared flag to properly manage form state after clear action
 ```
 
 ## User Preferences
