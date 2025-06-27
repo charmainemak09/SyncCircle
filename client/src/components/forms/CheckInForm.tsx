@@ -593,6 +593,7 @@ function FileUploadField({ questionId, currentValue, onUpload }: FileUploadField
 export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps) {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isCleared, setIsCleared] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -613,6 +614,9 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
   // Load existing answers
   useEffect(() => {
+    // Don't reload data if the form has been manually cleared
+    if (isCleared) return;
+    
     if (editResponseId && editResponse && typeof editResponse === 'object' && 'answers' in editResponse && editResponse.answers) {
       // Load data from the specific response being edited
       setAnswers(editResponse.answers as Record<string, any>);
@@ -620,7 +624,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
       // Load draft data for new submissions
       setAnswers(draftResponse.answers as Record<string, any>);
     }
-  }, [editResponse, draftResponse, editResponseId]);
+  }, [editResponse, draftResponse, editResponseId, isCleared]);
 
   // Auto-save mutation
   const autoSaveMutation = useMutation({
@@ -775,6 +779,12 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
   const updateAnswer = (questionId: string, value: any) => {
     console.log("Updating answer for question:", questionId, "with value:", value);
+    
+    // Reset cleared flag when user starts typing again
+    if (isCleared) {
+      setIsCleared(false);
+    }
+    
     setAnswers(prev => {
       const newAnswers = { ...prev, [questionId]: value };
       console.log("New answers state:", newAnswers);
@@ -783,13 +793,25 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
   };
 
   const clearForm = () => {
+    // Confirm before clearing
+    if (!window.confirm("Are you sure you want to clear all form data? This action cannot be undone.")) {
+      return;
+    }
+
     setAnswers({});
     setLastSaved(null);
+    setIsCleared(true);
     
     // Clear any cached draft data
     if (!editResponseId) {
       queryClient.removeQueries({ queryKey: [`/api/forms/${form.id}/my-response`] });
+    } else {
+      // For edit mode, also invalidate the specific response query
+      queryClient.removeQueries({ queryKey: [`/api/responses/${editResponseId}`] });
     }
+    
+    // Clear all query cache related to this form to force a refresh
+    queryClient.invalidateQueries({ queryKey: [`/api/forms/${form.id}`] });
     
     toast({
       title: "Form cleared",
