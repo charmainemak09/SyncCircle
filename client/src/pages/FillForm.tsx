@@ -12,14 +12,13 @@ export default function FillForm() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
 
-  // Extract edit parameter from URL
-  const urlParts = location.split('?');
-  const searchParams = urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
+  // Extract edit parameter from URL - use window.location.search to get query params
+  const searchParams = new URLSearchParams(window.location.search);
   const editResponseId = searchParams.get('edit');
   
-  console.log("FillForm - full location:", location);
-  console.log("FillForm - URL parts:", urlParts);
-  console.log("FillForm - search params string:", urlParts[1] || 'none');
+  console.log("FillForm - wouter location:", location);
+  console.log("FillForm - window.location.href:", window.location.href);
+  console.log("FillForm - window.location.search:", window.location.search);
   console.log("FillForm - editResponseId:", editResponseId);
 
   const { data: form, isLoading, error } = useQuery<Form>({

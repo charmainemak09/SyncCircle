@@ -48,8 +48,11 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
 
   const handleEditResponse = (response: Response & { user: User }) => {
     // Navigate to the form with the response data for editing
-    console.log("Navigating to edit response:", response.id, "for form:", response.formId);
-    setLocation(`/forms/${response.formId}/fill?edit=${response.id}`);
+    const editUrl = `/forms/${response.formId}/fill?edit=${response.id}`;
+    console.log("Navigating to edit response:", response.id, "for form:", response.formId, "URL:", editUrl);
+    
+    // Use setLocation with the query parameter
+    setLocation(editUrl);
   };
 
   const renderAnswer = (question: Question, answer: any) => {
