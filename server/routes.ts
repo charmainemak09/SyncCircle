@@ -902,6 +902,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete response with permission checks
+  app.delete("/api/responses/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const responseId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const existingResponse = await storage.getResponse(responseId);
+      if (!existingResponse) {
+        return res.status(404).json({ message: "Response not found" });
+      }
+
+      const form = await storage.getForm(existingResponse.formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      const role = await storage.getSpaceMemberRole(form.spaceId, userId);
+      if (!role) {
+        return res.status(403).json({ message: "Not a member of this space" });
+      }
+
+      // Check permissions: user can delete their own response, or admin can delete any response
+      const canDelete = existingResponse.userId === userId || role === "admin";
+      if (!canDelete) {
+        return res.status(403).json({ message: "You can only delete your own responses" });
+      }
+
+      const deleted = await storage.deleteResponse(responseId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete response" });
+      }
+
+      res.json({ message: "Response deleted successfully" });
+    } catch (error) {
+      console.error("Delete response error:", error);
+      res.status(500).json({ message: "Failed to delete response" });
+    }
+  });
+
   // Notification routes
   app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
     try {

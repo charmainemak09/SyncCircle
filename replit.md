@@ -159,6 +159,9 @@ Changelog:
 - June 27, 2025. Refactored backend response handling to properly manage drafts vs final submissions
 - June 27, 2025. Created separate mutations for each submission type with proper validation and user feedback
 - June 27, 2025. Enhanced form UI with conditional button display based on edit mode detection
+- June 27, 2025. Added delete functionality allowing users to delete their own responses with proper permission checks
+- June 27, 2025. Implemented DELETE /api/responses/:id endpoint with user ownership validation
+- June 27, 2025. Added delete button to response view with confirmation dialog and error handling
 ```
 
 ## User Preferences

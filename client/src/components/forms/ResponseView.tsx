@@ -6,8 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Download, Star, Clock, Edit } from "lucide-react";
+import { Download, Star, Clock, Edit, Trash2 } from "lucide-react";
 import { type Response, type User, type Question } from "@shared/schema";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResponseViewProps {
   responses: (Response & { user: User })[];
@@ -26,6 +29,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Calculate pagination
   const totalItems = responses.length;
@@ -46,6 +51,33 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
     return date.toLocaleDateString();
   };
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (responseId: number) => {
+      return apiRequest("DELETE", `/api/responses/${responseId}`);
+    },
+    onSuccess: (data, responseId) => {
+      // Get the form ID from the first response to invalidate the correct queries
+      const formId = responses.find(r => r.id === responseId)?.formId;
+      if (formId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${formId}/responses`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${formId}/my-response`] });
+      }
+      
+      toast({
+        title: "Response deleted",
+        description: "Your response has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete response",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEditResponse = (response: Response & { user: User }) => {
     // Navigate to the form with the response data for editing
     const editUrl = `/forms/${response.formId}/fill?edit=${response.id}`;
@@ -53,6 +85,12 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
     
     // Use setLocation with the query parameter
     setLocation(editUrl);
+  };
+
+  const handleDeleteResponse = (response: Response & { user: User }) => {
+    if (window.confirm(`Are you sure you want to delete this response? This action cannot be undone.`)) {
+      deleteMutation.mutate(response.id);
+    }
   };
 
   const renderAnswer = (question: Question, answer: any) => {
@@ -270,6 +308,7 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                       </div>
                     </div>
                     {currentUserId === response.user.id && (
+                    <div className="flex space-x-2">
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -277,8 +316,19 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                         className="flex items-center space-x-2"
                       >
                         <Edit className="w-3 h-3" />
-                        <span>Edit Response</span>
+                        <span>Edit</span>
                       </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteResponse(response)}
+                        disabled={deleteMutation.isPending}
+                        className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
                     )}
                   </div>
 
