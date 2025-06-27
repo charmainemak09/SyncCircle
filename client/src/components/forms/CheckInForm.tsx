@@ -797,8 +797,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
     });
   };
 
-  const handleSubmit = () => {
-    // Validate required questions
+  const validateRequiredFields = () => {
     const questions = form.questions as Question[];
     const missingRequired = questions
       .filter(q => q.required && !answers[q.id])
@@ -810,14 +809,27 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
         description: `Missing: ${missingRequired.join(", ")}`,
         variant: "destructive",
       });
-      return;
+      return false;
     }
-
-    submitMutation.mutate(answers);
-       if (editResponseId) {
-        setLocation(`/forms/${form.id}/responses`);
-      }
+    return true;
   };
+
+  const handleSubmit = () => {
+    if (!validateRequiredFields()) return;
+    submitMutation.mutate(answers);
+  };
+
+  const handleUpdate = () => {
+    if (!validateRequiredFields()) return;
+    updateMutation.mutate(answers);
+  };
+
+  const handleSave = () => {
+    // Save doesn't require validation - can save incomplete drafts
+    saveMutation.mutate(answers);
+  };
+
+
 
   const questions = form.questions as Question[];
 
@@ -1017,7 +1029,7 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
         <div className="flex space-x-2 w-full sm:w-auto">
           <Button
             variant="outline"
-            onClick={() => saveMutation.mutate(answers)}
+            onClick={handleSave}
             disabled={saveMutation.isPending || Object.keys(answers).length === 0}
             className="flex-1 sm:flex-none sm:w-auto min-h-[44px] text-base sm:text-sm"
           >
@@ -1037,8 +1049,8 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
 
         {editResponseId ? (
           <Button
-            onClick={() => updateMutation.mutate(answers)}
-            disabled={updateMutation.isPending || Object.keys(answers).length === 0}
+            onClick={handleUpdate}
+            disabled={updateMutation.isPending}
             className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
           >
             <Edit className="w-4 h-4 flex-shrink-0" />
@@ -1048,8 +1060,8 @@ export function CheckInForm({ form, onSubmit, editResponseId }: CheckInFormProps
           </Button>
         ) : (
           <Button
-            onClick={() => submitMutation.mutate(answers)}
-            disabled={submitMutation.isPending || Object.keys(answers).length === 0}
+            onClick={handleSubmit}
+            disabled={submitMutation.isPending}
             className="w-full sm:w-auto min-h-[44px] text-base sm:text-sm flex items-center justify-center space-x-2"
           >
             <Send className="w-4 h-4 flex-shrink-0" />

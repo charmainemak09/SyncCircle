@@ -155,6 +155,10 @@ Changelog:
 - June 23, 2025. Fixed edit functionality to prevent duplicate records - backend now automatically updates existing responses instead of creating new ones
 - June 23, 2025. Enhanced edit URL parsing and added debugging logs to track edit mode detection
 - June 23, 2025. Improved auto-save functionality to work for both new responses and edits
+- June 27, 2025. Implemented comprehensive three-mode form submission system with distinct Save, Submit, and Update actions
+- June 27, 2025. Refactored backend response handling to properly manage drafts vs final submissions
+- June 27, 2025. Created separate mutations for each submission type with proper validation and user feedback
+- June 27, 2025. Enhanced form UI with conditional button display based on edit mode detection
 ```
 
 ## User Preferences
