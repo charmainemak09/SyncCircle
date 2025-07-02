@@ -16,6 +16,7 @@ import { type Form } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { PendingSubmissionBadge } from "@/components/forms/PendingSubmissionBadge";
 
 export default function SpaceDetail() {
   const { id } = useParams();
@@ -489,9 +490,12 @@ export default function SpaceDetail() {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
                           <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{form.title}</h3>
-                          <Badge variant="secondary" className={getFormStatusColor(form)}>
-                            {form.isActive ? "Active" : "Inactive"}
-                          </Badge>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className={getFormStatusColor(form)}>
+                              {form.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            {form.isActive && <PendingSubmissionBadge formId={form.id} />}
+                          </div>
                         </div>
                         {form.description && (
                           <p className="text-gray-600 mb-3 text-sm sm:text-base line-clamp-2">{form.description}</p>
