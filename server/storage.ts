@@ -65,6 +65,9 @@ export interface IStorage {
   getOrCreateDefaultFeedbackSpace(): Promise<Space | undefined>;
   addUserToDefaultFeedbackSpace(userId: string): Promise<void>;
   createDefaultFeedbackForm(spaceId: number): Promise<void>;
+
+  // Check if user has pending submission for a form
+  hasPendingSubmission(formId: number, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -586,6 +589,44 @@ export class DatabaseStorage implements IStorage {
                 .returning();
     } catch (error) {
       console.error("Error creating default feedback form:", error);
+    }
+  }
+
+  async hasPendingSubmission(formId: number, userId: string): Promise<boolean> {
+    const form = await this.getForm(formId);
+    if (!form || !form.isActive) return false;
+
+    // Get user's most recent submitted response (not draft)
+    const [lastResponse] = await db
+      .select()
+      .from(responses)
+      .where(and(
+        eq(responses.formId, formId),
+        eq(responses.userId, userId),
+        eq(responses.isDraft, false)
+      ))
+      .orderBy(desc(responses.submittedAt))
+      .limit(1);
+
+    // If no response exists, it's pending
+    if (!lastResponse) return true;
+
+    // Calculate if a new response is due based on form frequency
+    const lastSubmissionDate = new Date(lastResponse.submittedAt);
+    const now = new Date();
+    const daysSinceLastSubmission = Math.floor((now.getTime() - lastSubmissionDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    switch (form.frequency) {
+      case 'daily':
+        return daysSinceLastSubmission >= 1;
+      case 'weekly':
+        return daysSinceLastSubmission >= 7;
+      case 'biweekly':
+        return daysSinceLastSubmission >= 14;
+      case 'monthly':
+        return daysSinceLastSubmission >= 30;
+      default:
+        return false;
     }
   }
 }

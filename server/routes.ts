@@ -857,6 +857,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user has pending submission for a form
+  app.get("/api/forms/:id/pending-submission", isAuthenticated, async (req: any, res) => {
+    try {
+      const formId = parseInt(req.params.id);
+      if (isNaN(formId)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+      const userId = req.user.claims.sub;
+
+      const form = await storage.getForm(formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      // Check if user is member of the space
+      const isMember = await storage.isSpaceMember(form.spaceId, userId);
+      if (!isMember) {
+        return res.status(403).json({ message: "Not a member of this space" });
+      }
+
+      const hasPending = await storage.hasPendingSubmission(formId, userId);
+      res.json({ hasPendingSubmission: hasPending });
+    } catch (error) {
+      console.error("Check pending submission error:", error);
+      res.status(500).json({ message: "Failed to check pending submission" });
+    }
+  });
+
   // Response routes
   app.get("/api/forms/:id/responses", isAuthenticated, async (req: any, res) => {
     try {
