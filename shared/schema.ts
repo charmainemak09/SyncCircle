@@ -56,6 +56,7 @@ export const forms = pgTable("forms", {
   startDate: text("start_date").notNull(), // "YYYY-MM-DD" format
   deadlineDuration: integer("deadline_duration").default(24).notNull(), // Hours to complete after form is sent
   isActive: boolean("is_active").default(true).notNull(),
+  lastNotificationSent: timestamp("last_notification_sent"), // Track when last scheduled notification was sent
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

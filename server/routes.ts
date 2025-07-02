@@ -189,15 +189,40 @@ async function checkAndSendScheduledNotifications(): Promise<void> {
         const now = new Date();
         const timeDiff = Math.abs(nextNotificationDate.getTime() - now.getTime());
         
-        // Send notification if we're within 5 minutes of the scheduled time
-        if (timeDiff <= 5 * 60 * 1000) {
+        // Check if we've already sent a notification for this time period
+        const lastSent = form.lastNotificationSent ? new Date(form.lastNotificationSent) : null;
+        const dayDiff = lastSent ? Math.floor((now.getTime() - lastSent.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+        
+        // Send notification if we're within 5 minutes of the scheduled time and haven't sent one today
+        if (timeDiff <= 5 * 60 * 1000 && (!lastSent || shouldSendNotification(form.frequency, dayDiff))) {
           console.log(`Sending scheduled notification for form: ${form.title} at ${now.toISOString()}`);
           await createScheduledFormNotifications(form.id);
+          
+          // Update the last notification sent timestamp
+          await storage.updateForm(form.id, { 
+            lastNotificationSent: now 
+          });
         }
       }
     }
   } catch (error) {
     console.error("Error checking scheduled notifications:", error);
+  }
+}
+
+// Helper function to determine if we should send a notification based on frequency
+function shouldSendNotification(frequency: string, daysSinceLastSent: number): boolean {
+  switch (frequency) {
+    case 'daily':
+      return daysSinceLastSent >= 1;
+    case 'weekly':
+      return daysSinceLastSent >= 7;
+    case 'biweekly':
+      return daysSinceLastSent >= 14;
+    case 'monthly':
+      return daysSinceLastSent >= 30;
+    default:
+      return false;
   }
 }
 
@@ -1120,6 +1145,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to manually trigger notification check (for demonstration)
+  app.post("/api/notifications/check-scheduled", isAuthenticated, async (req: any, res) => {
+    try {
+      await checkAndSendScheduledNotifications();
+      res.json({ message: "Scheduled notification check completed" });
+    } catch (error) {
+      console.error("Manual notification check error:", error);
+      res.status(500).json({ message: "Failed to check scheduled notifications" });
+    }
+  });
+
   const httpServer = createServer(app);
+  
+  // Start the notification scheduler
+  startNotificationScheduler();
+  
   return httpServer;
 }

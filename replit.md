@@ -165,6 +165,10 @@ Changelog:
 - June 27, 2025. Fixed clear button functionality with confirmation dialog and improved state management
 - June 27, 2025. Enhanced form clearing to prevent auto-reload of saved data after clearing
 - June 27, 2025. Added isCleared flag to properly manage form state after clear action
+- June 27, 2025. Implemented automated scheduled notification system based on form frequency, send time, and start date
+- June 27, 2025. Added lastNotificationSent field to forms schema to prevent duplicate notifications
+- June 27, 2025. Created notification scheduler that runs every minute checking for forms due for notifications
+- June 27, 2025. Enhanced notification system to support recurring reminders (daily, weekly, biweekly, monthly)
 ```
 
 ## User Preferences
