@@ -13,6 +13,84 @@ function generateInviteCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+// Helper function to calculate next notification date based on frequency
+function calculateNextNotificationDate(startDate: string, frequency: string, sendTime: string): Date | null {
+  const start = new Date(startDate);
+  const now = new Date();
+  
+  // Parse send time (HH:MM format)
+  const [hours, minutes] = sendTime.split(':').map(Number);
+  
+  // Set the time for start date
+  start.setHours(hours, minutes, 0, 0);
+  
+  // If start date is in the future, return it
+  if (start > now) {
+    return start;
+  }
+  
+  // Calculate next occurrence based on frequency
+  const current = new Date(start);
+  
+  while (current <= now) {
+    switch (frequency) {
+      case 'daily':
+        current.setDate(current.getDate() + 1);
+        break;
+      case 'weekly':
+        current.setDate(current.getDate() + 7);
+        break;
+      case 'biweekly':
+        current.setDate(current.getDate() + 14);
+        break;
+      case 'monthly':
+        current.setMonth(current.getMonth() + 1);
+        break;
+      default:
+        return null;
+    }
+  }
+  
+  return current;
+}
+
+// Helper function to create scheduled form notifications
+async function createScheduledFormNotifications(formId: number): Promise<void> {
+  try {
+    const form = await storage.getForm(formId);
+    if (!form || !form.isActive) return;
+
+    // Skip notifications for Community Feedback space's Platform Feedback form
+    const space = await storage.getSpace(form.spaceId);
+    if (space && space.name === "Community Feedback" && form.title === "Platform Feedback") {
+      return;
+    }
+
+    const spaceMembers = await storage.getSpaceMembers(form.spaceId);
+    const deadlineHours = form.deadlineDuration || 24;
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + deadlineHours);
+
+    const notifications: InsertNotification[] = spaceMembers.map(member => ({
+      userId: member.userId,
+      spaceId: form.spaceId,
+      type: "form_reminder",
+      title: `Scheduled Check-in: ${form.title}`,
+      message: `Time for your ${form.frequency} check-in! Please submit your response to "${form.title}" before ${deadline.toLocaleDateString()} ${deadline.toLocaleTimeString()}.`,
+      formId: form.id,
+      isRead: false
+    }));
+
+    for (const notification of notifications) {
+      await storage.createNotification(notification);
+    }
+
+    console.log(`Created ${notifications.length} scheduled notifications for form: ${form.title}`);
+  } catch (error) {
+    console.error("Error creating scheduled form notifications:", error);
+  }
+}
+
 // Helper function to create form reminder notifications
 async function createFormReminderNotifications(formId: number): Promise<void> {
   try {
@@ -84,6 +162,54 @@ async function createNewResponseNotifications(formId: number, submitterUserId: s
   } catch (error) {
     console.error("Error creating new response notifications:", error);
   }
+}
+
+// Scheduler function to check and send scheduled notifications
+async function checkAndSendScheduledNotifications(): Promise<void> {
+  try {
+    console.log("Checking for scheduled notifications...");
+    
+    // Get all active forms
+    const allSpaces = await storage.getAllSpaces();
+    
+    for (const space of allSpaces) {
+      const forms = await storage.getSpaceForms(space.id);
+      
+      for (const form of forms) {
+        if (!form.isActive) continue;
+        
+        const nextNotificationDate = calculateNextNotificationDate(
+          form.startDate,
+          form.frequency,
+          form.sendTime
+        );
+        
+        if (!nextNotificationDate) continue;
+        
+        const now = new Date();
+        const timeDiff = Math.abs(nextNotificationDate.getTime() - now.getTime());
+        
+        // Send notification if we're within 5 minutes of the scheduled time
+        if (timeDiff <= 5 * 60 * 1000) {
+          console.log(`Sending scheduled notification for form: ${form.title} at ${now.toISOString()}`);
+          await createScheduledFormNotifications(form.id);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error checking scheduled notifications:", error);
+  }
+}
+
+// Start notification scheduler
+function startNotificationScheduler(): void {
+  console.log("Starting notification scheduler...");
+  
+  // Check for notifications every minute
+  setInterval(checkAndSendScheduledNotifications, 60 * 1000);
+  
+  // Run initial check
+  checkAndSendScheduledNotifications();
 }
 
 // Configure multer for file uploads

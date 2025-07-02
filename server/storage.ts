@@ -19,6 +19,7 @@ export interface IStorage {
   // Spaces
   getSpace(id: number): Promise<Space | undefined>;
   getSpaceByInviteCode(inviteCode: string): Promise<Space | undefined>;
+  getAllSpaces(): Promise<Space[]>;
   getUserSpaces(userId: string): Promise<(Space & { memberCount: number; role: string })[]>;
   createSpace(space: InsertSpace & { inviteCode: string }): Promise<Space>;
   updateSpace(id: number, updates: Partial<InsertSpace>): Promise<Space | undefined>;
@@ -107,6 +108,10 @@ export class DatabaseStorage implements IStorage {
   async getSpaceByInviteCode(inviteCode: string): Promise<Space | undefined> {
     const [space] = await db.select().from(spaces).where(eq(spaces.inviteCode, inviteCode));
     return space || undefined;
+  }
+
+  async getAllSpaces(): Promise<Space[]> {
+    return await db.select().from(spaces).orderBy(desc(spaces.createdAt));
   }
 
   async getUserSpaces(userId: string): Promise<(Space & { memberCount: number; role: string })[]> {
