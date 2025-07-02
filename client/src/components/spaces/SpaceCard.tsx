@@ -41,7 +41,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
 
   return (
     <Link href={`/spaces/${space.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${isFeedbackSpace ? 'border-2 border-purple-500 shadow-lg' : ''}`}>
         <CardContent className="p-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className={`w-12 h-12 ${iconConfig.bg} rounded-lg flex items-center justify-center text-white font-semibold`}>
@@ -54,7 +54,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
           </div>
 
           {space.description && (
-            <p className="text-sm mb-4 line-clamp-2 text-gray-600">
+            <p className={`text-sm mb-4 line-clamp-2 ${isFeedbackSpace ? 'text-purple-700' : 'text-gray-600'}`}>
               {space.description}
             </p>
           )}
