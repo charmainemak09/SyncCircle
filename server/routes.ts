@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
@@ -406,12 +406,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve uploaded files
+  // Serve uploaded files statically
   app.use('/uploads', (req, res, next) => {
     const filePath = path.join(uploadsDir, req.path);
+    console.log('Attempting to serve file:', filePath);
     if (fs.existsSync(filePath)) {
-      res.sendFile(filePath);
+      res.sendFile(path.resolve(filePath));
     } else {
+      console.log('File not found:', filePath);
       res.status(404).json({ message: "File not found" });
     }
   });

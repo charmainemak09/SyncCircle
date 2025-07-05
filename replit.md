@@ -169,6 +169,10 @@ Changelog:
 - June 27, 2025. Added lastNotificationSent field to forms schema to prevent duplicate notifications
 - June 27, 2025. Created notification scheduler that runs every minute checking for forms due for notifications
 - June 27, 2025. Enhanced notification system to support recurring reminders (daily, weekly, biweekly, monthly)
+- July 2, 2025. Implemented "Pending Submission" notification badge system for form cards based on frequency and last submission
+- July 2, 2025. Added API endpoint to check pending submissions with frequency-based logic
+- July 2, 2025. Enhanced image display in forms and responses to show images directly instead of view buttons
+- July 2, 2025. Fixed static file serving for uploads directory using express.static middleware
 ```
 
 ## User Preferences
