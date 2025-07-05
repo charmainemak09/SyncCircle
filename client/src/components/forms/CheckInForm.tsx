@@ -159,55 +159,37 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
   return (
     <div className="space-y-4">
       {currentValue && !selectedFile ? (
-        <div className="border rounded-lg p-4 sm:p-6 bg-white shadow-sm">
-          <div className="mb-4">
+        <div className="border rounded-lg p-4 bg-white shadow-sm">
+          <div className="space-y-3">
             <img 
               src={currentValue} 
               alt="Uploaded image" 
-              className="max-w-full max-h-48 rounded-lg object-contain border mx-auto"
+              className="max-w-full h-auto max-h-64 rounded-lg object-contain border mx-auto cursor-pointer"
+              onClick={() => window.open(currentValue, '_blank')}
             />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <FileImage className="w-8 h-8 text-blue-500 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{currentValue.split('/').pop()}</p>
-                <p className="text-xs text-gray-500">Image File</p>
-              </div>
-            </div>
-            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 pt-2">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
-                onClick={() => window.open(currentValue, '_blank')}
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
+                className="w-full sm:w-auto"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                Replace
+                Replace Image
               </Button>
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
+                className="w-full sm:w-auto"
                 onClick={handleRemoveImage}
               >
                 <X className="w-4 h-4 mr-2" />
                 Remove
               </Button>
             </div>
+            <p className="text-xs text-gray-500 text-center">Click image to view full size</p>
           </div>
         </div>
       ) : (

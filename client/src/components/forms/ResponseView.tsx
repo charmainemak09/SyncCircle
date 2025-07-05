@@ -150,21 +150,15 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
       case "image":
         return (
           <div className={containerClass}>
-            <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-gray-600 text-xs">🖼️</span>
-              </div>
-              <div className="flex-1">
-                <p className={textClass}>Image uploaded</p>
-                <a 
-                  href={answer} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`${textClass} text-gray-600 hover:text-gray-800 underline`}
-                >
-                  View image
-                </a>
-              </div>
+            <div className="space-y-3">
+              <img 
+                src={answer} 
+                alt="Response image" 
+                className="max-w-full h-auto max-h-64 rounded-lg object-contain border mx-auto"
+                onClick={() => window.open(answer, '_blank')}
+                style={{ cursor: 'pointer' }}
+              />
+              <p className="text-xs text-gray-500 text-center">Click to view full size</p>
             </div>
           </div>
         );
