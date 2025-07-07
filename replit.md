@@ -173,6 +173,7 @@ Changelog:
 - July 2, 2025. Added API endpoint to check pending submissions with frequency-based logic
 - July 2, 2025. Enhanced image display in forms and responses to show images directly instead of view buttons
 - July 2, 2025. Fixed static file serving for uploads directory using express.static middleware
+- July 7, 2025. Added Google AdSense script to HTML head section for monetization
 ```
 
 ## User Preferences
