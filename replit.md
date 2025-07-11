@@ -181,6 +181,9 @@ Changelog:
 - July 11, 2025. Redesigned dashboard with hero section featuring gradient text and improved layout
 - July 11, 2025. Fixed create space modal accessibility with better contrast, clear text, and improved styling
 - July 11, 2025. Enhanced image display in forms and responses with error handling and consistent styling
+- July 11, 2025. Fixed image serving with improved express.static middleware and proper content-type headers
+- July 11, 2025. Enhanced modal accessibility across the app with better contrast, focus management, and ARIA attributes
+- July 11, 2025. Replaced window.confirm with accessible AlertDialog for delete confirmations
 ```
 
 ## User Preferences

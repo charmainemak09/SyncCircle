@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Download, Star, Clock, Edit, Trash2 } from "lucide-react";
 import { type Response, type User, type Question } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -87,10 +88,8 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
     setLocation(editUrl);
   };
 
-  const handleDeleteResponse = (response: Response & { user: User }) => {
-    if (window.confirm(`Are you sure you want to delete this response? This action cannot be undone.`)) {
-      deleteMutation.mutate(response.id);
-    }
+  const handleDeleteResponse = (responseId: number) => {
+    deleteMutation.mutate(responseId);
   };
 
   const renderAnswer = (question: Question, answer: any) => {
@@ -332,16 +331,36 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
                         <Edit className="w-3 h-3" />
                         <span>Edit</span>
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDeleteResponse(response)}
-                        disabled={deleteMutation.isPending}
-                        className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        <span>Delete</span>
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            disabled={deleteMutation.isPending}
+                            className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>Delete</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent aria-describedby="delete-response-description">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Response</AlertDialogTitle>
+                            <AlertDialogDescription id="delete-response-description">
+                              Are you sure you want to delete this response? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteResponse(response.id)}
+                              className="bg-red-600 hover:bg-red-700 focus:ring-2 focus:ring-red-500"
+                            >
+                              Delete Response
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                     )}
                   </div>

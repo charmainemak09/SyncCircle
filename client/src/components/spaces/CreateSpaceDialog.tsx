@@ -90,10 +90,15 @@ export function CreateSpaceDialog() {
           setOpen(newOpen);
         }}
       >
-        <DialogContent className="sm:max-w-[425px] bg-white shadow-2xl border-0" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        <DialogContent 
+          className="sm:max-w-[425px] bg-white shadow-2xl border-0" 
+          onPointerDownOutside={(e) => e.preventDefault()} 
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          aria-describedby="create-space-description"
+        >
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Create New Space</DialogTitle>
-            <DialogDescription className="text-gray-600 text-base">
+            <DialogDescription id="create-space-description" className="text-gray-600 text-base">
               Set up a new collaboration space for your team to share updates and stay aligned.
             </DialogDescription>
           </DialogHeader>

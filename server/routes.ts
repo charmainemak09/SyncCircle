@@ -406,17 +406,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve uploaded files statically
-  app.use('/uploads', (req, res, next) => {
-    const filePath = path.join(uploadsDir, req.path);
-    console.log('Attempting to serve file:', filePath);
-    if (fs.existsSync(filePath)) {
-      res.sendFile(path.resolve(filePath));
-    } else {
-      console.log('File not found:', filePath);
-      res.status(404).json({ message: "File not found" });
+  // Serve uploaded files statically with better error handling
+  app.use('/uploads', express.static(uploadsDir, {
+    maxAge: '1d', // Cache for 1 day
+    setHeaders: (res, path, stat) => {
+      // Set appropriate content type for images
+      if (path.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        res.setHeader('Content-Type', 'image/' + path.split('.').pop().toLowerCase());
+      }
     }
-  });
+  }));
 
   // Space routes
   app.get("/api/spaces", isAuthenticated, async (req: any, res) => {
