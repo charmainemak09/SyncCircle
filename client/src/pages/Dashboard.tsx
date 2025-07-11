@@ -4,11 +4,12 @@ import { SpaceCard } from "@/components/spaces/SpaceCard";
 import { CreateSpaceDialog } from "@/components/spaces/CreateSpaceDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Users } from "lucide-react";
+import { MessageSquare, Users, Plus } from "lucide-react";
 import { useState } from "react";
+import { TeamCollaborationIllustration, EmptyStateIllustration } from "@/components/ui/illustrations";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -56,75 +57,98 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="mb-6">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Your Spaces</h2>
-            <p className="text-gray-600 mt-1">
-              Manage your team collaboration spaces and check-ins
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto">Join Space</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Join a Space</DialogTitle>
-                  <DialogDescription>
-                    Enter the invite code to join an existing space.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Enter invite code..."
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    maxLength={6}
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setJoinDialogOpen(false)}
-                    >
-                      Cancel
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600/10 via-pink-500/10 to-blue-600/10 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 bg-clip-text text-transparent mb-6">
+                SyncCircle
+              </h1>
+              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+                Transform team collaboration with intelligent check-ins, beautiful forms, and real-time insights that keep everyone connected.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <CreateSpaceDialog />
+                <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="lg" className="bg-white/80 backdrop-blur-sm hover:bg-white/90 border-purple-200">
+                      <Users className="mr-2 h-5 w-5" />
+                      Join Space
                     </Button>
-                    <Button
-                      onClick={() => joinSpaceMutation.mutate(joinCode)}
-                      disabled={!joinCode || joinSpaceMutation.isPending}
-                    >
-                      {joinSpaceMutation.isPending ? "Joining..." : "Join Space"}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-            <CreateSpaceDialog />
+                  </DialogTrigger>
+                  <DialogContent className="backdrop-blur-md bg-white/95">
+                    <DialogHeader>
+                      <DialogTitle className="text-gradient">Join a Space</DialogTitle>
+                      <DialogDescription>
+                        Enter the invite code to join an existing space
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Enter invite code"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value)}
+                        className="bg-white/80 backdrop-blur-sm"
+                      />
+                      <Button 
+                        onClick={() => joinSpaceMutation.mutate(joinCode)}
+                        disabled={!joinCode || joinSpaceMutation.isPending}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+                      >
+                        {joinSpaceMutation.isPending ? "Joining..." : "Join Space"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="w-full h-80 relative">
+                <TeamCollaborationIllustration />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Spaces Section */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="mb-8">
+          <div className="mb-6">
+            <div className="mb-4">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">Your Spaces</h2>
+              <p className="text-gray-600 mt-2 text-lg">
+                Manage your team collaboration spaces and check-ins
+              </p>
+            </div>
+          </div>
+        </div>
+
       {/* Spaces Grid */}
       {spaces.length === 0 ? (
-        <Card className="text-center py-12">
+        <Card className="text-center py-16 bg-gradient-to-br from-white/90 to-purple-50/90 backdrop-blur-sm border-0 shadow-xl">
           <CardContent>
-            <div className="text-6xl mb-4">🚀</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="w-48 h-32 mx-auto mb-8">
+              <EmptyStateIllustration />
+            </div>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-3">
               Welcome to SyncCircle!
             </h3>
-            <p className="text-gray-600 mb-6">
-              Create your first space to start collaborating with your team on recurring check-ins.
+            <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto">
+              Create your first space to start collaborating with your team on recurring check-ins and beautiful surveys.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
               <CreateSpaceDialog />
               <Button
                 variant="outline"
                 onClick={() => setJoinDialogOpen(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-white/80 backdrop-blur-sm hover:bg-white/90 border-purple-200"
+                size="lg"
               >
+                <Users className="mr-2 h-5 w-5" />
                 Join Existing Space
               </Button>
             </div>
@@ -183,6 +207,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

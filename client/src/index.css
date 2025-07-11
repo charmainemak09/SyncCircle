@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 99%);
+  --background: linear-gradient(135deg, hsl(210, 100%, 97%) 0%, hsl(320, 100%, 98%) 50%, hsl(60, 100%, 97%) 100%);
+  --background-solid: hsl(210, 100%, 97%);
   --foreground: hsl(224, 71.4%, 4.1%);
   --muted: hsl(220, 14.3%, 95.9%);
   --muted-foreground: hsl(220, 8.9%, 46.1%);
@@ -13,16 +14,24 @@
   --card-foreground: hsl(224, 71.4%, 4.1%);
   --border: hsl(220, 13%, 91%);
   --input: hsl(220, 13%, 91%);
-  --primary: hsl(221.2, 83.2%, 53.3%);
+  --primary: hsl(262, 83%, 58%);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(51, 100%, 60%);
-  --secondary-foreground: hsl(222.2, 84%, 4.9%);
-  --accent: hsl(210, 40%, 96%);
+  --secondary: hsl(142, 86%, 28%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(43, 96%, 56%);
   --accent-foreground: hsl(222.2, 84%, 4.9%);
   --destructive: hsl(0, 72.2%, 50.6%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(221.2, 83.2%, 53.3%);
+  --ring: hsl(262, 83%, 58%);
   --radius: 0.75rem;
+  
+  /* Fun gradient colors */
+  --gradient-purple: hsl(262, 83%, 58%);
+  --gradient-pink: hsl(322, 84%, 64%);
+  --gradient-blue: hsl(217, 91%, 60%);
+  --gradient-green: hsl(142, 86%, 28%);
+  --gradient-yellow: hsl(43, 96%, 56%);
+  --gradient-orange: hsl(25, 95%, 53%);
 }
 
 .dark {
@@ -54,7 +63,10 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
+    background: var(--background);
+    background-attachment: fixed;
+    min-height: 100vh;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 

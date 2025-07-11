@@ -65,7 +65,8 @@ export function CreateSpaceDialog() {
   return (
     <>
       <Button 
-        className="flex items-center justify-center space-x-2 w-full sm:w-auto"
+        className="flex items-center justify-center space-x-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all duration-300"
+        size="lg"
         onClick={() => {
           console.log("Create Space button clicked - opening dialog");
           console.log("Setting open to true");

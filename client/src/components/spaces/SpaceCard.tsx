@@ -15,9 +15,12 @@ interface SpaceCardProps {
 }
 
 const spaceIcons = [
-  { bg: "bg-gradient-to-br from-primary to-indigo-600", icon: Users },
-  { bg: "bg-gradient-to-br from-secondary to-green-600", icon: Users },
-  { bg: "bg-gradient-to-br from-accent to-yellow-600", icon: Users },
+  { bg: "bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600", icon: Users },
+  { bg: "bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600", icon: Users },
+  { bg: "bg-gradient-to-br from-orange-400 via-yellow-500 to-amber-600", icon: Users },
+  { bg: "bg-gradient-to-br from-rose-400 via-red-500 to-pink-600", icon: Users },
+  { bg: "bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600", icon: Users },
+  { bg: "bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600", icon: Users },
 ];
 
 export function SpaceCard({ space }: SpaceCardProps) {
@@ -41,11 +44,12 @@ export function SpaceCard({ space }: SpaceCardProps) {
 
   return (
     <Link href={`/spaces/${space.id}`}>
-      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${isFeedbackSpace ? 'border-2 border-purple-500 shadow-lg' : ''}`}>
-        <CardContent className="p-6">
+      <Card className={`group hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer bg-white/80 backdrop-blur-sm border-0 overflow-hidden ${isFeedbackSpace ? 'ring-2 ring-purple-500/30 shadow-lg shadow-purple-500/20' : 'hover:ring-2 hover:ring-purple-500/20'}`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-center space-x-3 mb-4">
-            <div className={`w-12 h-12 ${iconConfig.bg} rounded-lg flex items-center justify-center text-white font-semibold`}>
-              <Icon className="w-6 h-6" />
+            <div className={`w-12 h-12 ${iconConfig.bg} rounded-xl flex items-center justify-center text-white font-semibold shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+              <Icon className="w-6 h-6 drop-shadow-sm" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">{space.name}</h3>
