@@ -90,36 +90,43 @@ export function CreateSpaceDialog() {
           setOpen(newOpen);
         }}
       >
-        <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-[425px] bg-white shadow-2xl border-0" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Create New Space</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-bold text-gray-900">Create New Space</DialogTitle>
+            <DialogDescription className="text-gray-600 text-base">
               Set up a new collaboration space for your team to share updates and stay aligned.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Space Name</label>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Space Name</label>
               <Input 
                 placeholder="e.g., Marketing Team" 
                 value={form.watch("name")}
                 onChange={(e) => form.setValue("name", e.target.value)}
+                className="bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Description (Optional)</label>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Description (Optional)</label>
               <Textarea 
                 placeholder="Describe the purpose of this space..."
                 rows={3}
                 value={form.watch("description") ?? ""}
                 onChange={(e) => form.setValue("description", e.target.value)}
+                className="bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
               />
             </div>
             
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setOpen(false)}
+                className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              >
                 Cancel
               </Button>
               <Button 
@@ -131,6 +138,7 @@ export function CreateSpaceDialog() {
                   }
                 }}
                 disabled={createSpaceMutation.isPending}
+                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white"
               >
                 {createSpaceMutation.isPending ? "Creating..." : "Create Space"}
               </Button>

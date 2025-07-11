@@ -159,20 +159,41 @@ function ImageUploadField({ questionId, currentValue, onUpload }: ImageUploadFie
   return (
     <div className="space-y-4">
       {currentValue && !selectedFile ? (
-        <div className="border rounded-lg p-4 bg-white shadow-sm">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <div className="space-y-3">
-            <img 
-              src={currentValue} 
-              alt="Uploaded image" 
-              className="max-w-full h-auto max-h-64 rounded-lg object-contain border mx-auto cursor-pointer"
-              onClick={() => window.open(currentValue, '_blank')}
-            />
+            <div className="relative bg-white rounded-lg p-2 border border-gray-100">
+              <img 
+                src={currentValue} 
+                alt="Uploaded image" 
+                className="max-w-full h-auto max-h-64 rounded-lg object-contain mx-auto cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => window.open(currentValue, '_blank')}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling.style.display = 'block';
+                }}
+              />
+              <div 
+                className="hidden text-center py-8 text-gray-500" 
+                style={{ display: 'none' }}
+              >
+                <div className="text-4xl mb-2">🖼️</div>
+                <p className="text-sm">Image unavailable</p>
+                <a 
+                  href={currentValue} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:text-purple-700 underline text-sm"
+                >
+                  Try direct link
+                </a>
+              </div>
+            </div>
             <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-white hover:bg-gray-50"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="w-4 h-4 mr-2" />

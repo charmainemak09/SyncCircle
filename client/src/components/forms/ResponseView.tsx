@@ -151,14 +151,34 @@ export function ResponseView({ responses, questions, stats, formTitle, currentUs
         return (
           <div className={containerClass}>
             <div className="space-y-3">
-              <img 
-                src={answer} 
-                alt="Response image" 
-                className="max-w-full h-auto max-h-64 rounded-lg object-contain border mx-auto"
-                onClick={() => window.open(answer, '_blank')}
-                style={{ cursor: 'pointer' }}
-              />
-              <p className="text-xs text-gray-500 text-center">Click to view full size</p>
+              <div className="relative bg-gray-50 rounded-lg p-2 border border-gray-200">
+                <img 
+                  src={answer} 
+                  alt="Response image" 
+                  className="max-w-full h-auto max-h-64 rounded-lg object-contain mx-auto cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => window.open(answer, '_blank')}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling.style.display = 'block';
+                  }}
+                />
+                <div 
+                  className="hidden text-center py-8 text-gray-500" 
+                  style={{ display: 'none' }}
+                >
+                  <div className="text-4xl mb-2">🖼️</div>
+                  <p className="text-sm">Image unavailable</p>
+                  <a 
+                    href={answer} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-purple-600 hover:text-purple-700 underline text-sm"
+                  >
+                    Try direct link
+                  </a>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 text-center">Click image to view full size</p>
             </div>
           </div>
         );

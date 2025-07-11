@@ -179,6 +179,8 @@ Changelog:
 - July 11, 2025. Updated color scheme with purple, pink, and blue gradients for more modern appearance
 - July 11, 2025. Enhanced space cards with glass morphism effects, hover animations, and colorful gradient icons
 - July 11, 2025. Redesigned dashboard with hero section featuring gradient text and improved layout
+- July 11, 2025. Fixed create space modal accessibility with better contrast, clear text, and improved styling
+- July 11, 2025. Enhanced image display in forms and responses with error handling and consistent styling
 ```
 
 ## User Preferences
